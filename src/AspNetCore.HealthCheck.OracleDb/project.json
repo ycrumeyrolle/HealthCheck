@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.1.0-*",
 
   "buildOptions": {
@@ -9,7 +9,9 @@
     "xmlDoc": true
   },
   "dependencies": {
-    "AspNetCore.HealthCheck.Abstractions": "1.1.0"
+    "AspNetCore.HealthCheck.Abstractions": "1.1.0",
+    "Microsoft.Extensions.Configuration.Abstractions": "1.1.0",
+    "Microsoft.Extensions.Configuration.Binder": "1.1.0"
   },
 
   "frameworks": {

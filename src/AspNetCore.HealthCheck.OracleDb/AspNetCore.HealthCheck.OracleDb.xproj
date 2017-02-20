@@ -10,7 +10,7 @@
     <ProjectGuid>89a3ba4d-277e-4dc0-b05c-4efe74c47ebd</ProjectGuid>
     <RootNamespace>AspNetCore.HealthCheck.OracleDb</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
-    <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
+    <OutputPath Condition="'$(OutputPath)'=='' ">..\..\artifacts\bin</OutputPath>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
   </PropertyGroup>
 

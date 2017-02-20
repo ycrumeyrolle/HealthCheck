@@ -32,6 +32,9 @@ namespace AspNetCore.HealthCheck.OracleDb
 #if NETSTANDARD1_3
         public override Task CheckHealthAsync(HealthContext context, OracleDbWatchSettings settings)
         {
+            // OracleManaged not yet compatible with netcore 
+            // check forced to failed since it's not supported
+
             context.Fail("Not Supported");
             return Task.FromResult(0);
         }
