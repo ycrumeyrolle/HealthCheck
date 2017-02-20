@@ -7,6 +7,8 @@ namespace AspNetCore.HealthCheck.Smtp
 {
     public class SmtpWatcher : HealthWatcher<SmtpWatchSettings>
     {
+        private const string SmtpRequestedActionOkResponseCode = "250";
+
         public override async Task CheckHealthAsync(HealthContext context, SmtpWatchSettings settings)
         {
             using (var tcpClient = new TcpClient())
@@ -42,11 +44,11 @@ namespace AspNetCore.HealthCheck.Smtp
                         using (writer)
                         {
                             await reader.ReadLineAsync();
-                            await writer.WriteLineAsync($"EHLO {settings.SmtpAddress}");
+                            await writer.WriteLineAsync(settings.EhloCommand);
                             await writer.FlushAsync();
                             string smtpResponse = await reader.ReadLineAsync();
 
-                            if (smtpResponse.StartsWith("250"))
+                            if (smtpResponse.StartsWith(SmtpRequestedActionOkResponseCode))
                             {
                                 context.Succeed(smtpResponse);
                             }
