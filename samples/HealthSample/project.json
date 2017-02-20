@@ -11,6 +11,7 @@
     "AspNetCore.HealthCheck.X509Certificate": "1.1.0-*",
     "AspNetCore.HealthCheck.Counter": "1.1.0-*",
     "AspNetCore.HealthCheck.Process": "1.1.0-*",
+    "AspNetCore.HealthCheck.SqlServerDb": "1.1.0-*",
     "Microsoft.EntityFrameworkCore": "1.1.0",
     "Microsoft.EntityFrameworkCore.InMemory": "1.1.0"
   },
