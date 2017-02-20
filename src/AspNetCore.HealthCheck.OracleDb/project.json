@@ -1,0 +1,27 @@
+﻿{
+  "version": "1.1.0-*",
+
+  "buildOptions": {
+    "warningsAsErrors": true,
+    "nowarn": [
+      "CS1591"
+    ],
+    "xmlDoc": true
+  },
+  "dependencies": {
+    "AspNetCore.HealthCheck.Abstractions": "1.1.0"
+  },
+
+  "frameworks": {
+    "net451": {
+      "dependencies": {
+        "Oracle.ManagedDataAccess": "12.1.24160719"
+      },
+      "frameworkAssemblies": {
+        "System.Data": "4.0.0.0"
+      }
+    },
+    "netstandard1.3": {
+    }
+  }
+}
