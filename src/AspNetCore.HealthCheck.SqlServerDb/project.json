@@ -1,0 +1,24 @@
+{
+  "version": "1.1.0-*",
+
+  "buildOptions": {
+    "warningsAsErrors": true,
+    "nowarn": [
+      "CS1591"
+    ],
+    "xmlDoc": true
+  },
+  "dependencies": {
+    "AspNetCore.HealthCheck.Abstractions": "1.1.0-*",
+    "Microsoft.Extensions.Configuration.Abstractions": "1.1.0",
+    "Microsoft.Extensions.Configuration.Binder": "1.1.0",
+    "System.Data.Common": "4.3.0",
+    "System.Data.SqlClient": "4.3.0"
+  },
+
+  "frameworks": {
+    "net451": {},
+    "netstandard1.3": {
+    }
+  }
+}
