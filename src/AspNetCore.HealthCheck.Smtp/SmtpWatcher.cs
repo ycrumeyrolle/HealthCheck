@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -19,14 +20,14 @@ namespace AspNetCore.HealthCheck.Smtp
                     StreamWriter writer = null;
                     StreamReader reader = null;
 
-#if NETSTANDARD1_3
-                    // Ssl Stream is not implemented in netstandard1.3
-                    // it will come in 2.0
-                    settings.UseSsl = false;
-#endif
+
                     if (settings.UseSsl)
                     {
-#if !NETSTANDARD1_3
+#if NETSTANDARD1_3
+                        // Ssl Stream is not implemented in netstandard1.3
+                        // it will come in 2.0
+                        throw new NotSupportedException();
+#else
                         var sslStream = new SslStream(networkStream);
                         await sslStream.AuthenticateAsClientAsync(settings.SmtpAddress);
                         writer = new StreamWriter(sslStream);
@@ -50,11 +51,12 @@ namespace AspNetCore.HealthCheck.Smtp
 
                             if (smtpResponse.StartsWith(SmtpRequestedActionOkResponseCode))
                             {
-                                context.Succeed(smtpResponse);
+                                context.Succeed();
                             }
                             else
                             {
-                                context.Fail(smtpResponse);
+                                // TODO : log error to let people understand why it is failing
+                                context.Fail();
                             }
                         }
                     }
