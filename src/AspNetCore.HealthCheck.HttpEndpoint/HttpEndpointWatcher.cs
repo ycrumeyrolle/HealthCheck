@@ -11,11 +11,10 @@ namespace AspNetCore.HealthCheck.HttpEndpoint
         public async override Task CheckHealthAsync(HealthContext context, HttpEndpointWatchSettings settings)
         {
             var requestSettings = settings.Request;
-            Stopwatch dnsStopwatch = Stopwatch.StartNew();
             var entry = await Dns.GetHostEntryAsync(requestSettings.Uri.DnsSafeHost);
-            dnsStopwatch.Stop();
 
-            var properties = new Dictionary<string, object> { { "dns_resolve", dnsStopwatch.ElapsedMilliseconds } };
+            var properties = new Dictionary<string, object> { { "dns_resolve", context.Stopwatch.ElapsedMilliseconds } };
+            context.Stopwatch.Reset();
             using (HttpClient client = new HttpClient())
             {
                 using (var request = new HttpRequestMessage(requestSettings.HttpMethod, requestSettings.Uri))
@@ -31,7 +30,7 @@ namespace AspNetCore.HealthCheck.HttpEndpoint
                         }
                         else
                         {
-                            context.Fail(response.ReasonPhrase, properties);
+                            context.Fail(response.ReasonPhrase, properties: properties);
                         }
                     }
                 }

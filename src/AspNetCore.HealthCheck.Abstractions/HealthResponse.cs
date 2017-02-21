@@ -38,7 +38,7 @@ namespace AspNetCore.HealthCheck
         public IEnumerable<HealthCheckResult> Errors
         {
             get
-            {                
+            {
                 for (int i = 0; i < Results.Count; i++)
                 {
                     var result = Results[i];

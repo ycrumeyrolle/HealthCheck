@@ -11,12 +11,7 @@ namespace AspNetCore.HealthCheck
             var virtualMemorySize = System.Diagnostics.Process.GetCurrentProcess().VirtualMemorySize64;
             if (virtualMemorySize <= settings.Threshold)
             {
-                context.Succeed(
-                    properties: new Dictionary<string, object>
-                    {
-                            { "virtual_memory_size", virtualMemorySize},
-                            { "threshold" , settings.Threshold }
-                    });
+                context.Succeed();
             }
             else
             {

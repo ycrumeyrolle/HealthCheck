@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace AspNetCore.HealthCheck
 {
@@ -12,6 +13,7 @@ namespace AspNetCore.HealthCheck
         public HealthContext(IWatchSettings settings)
         {
             Settings = settings;
+            Stopwatch = new Stopwatch();
         }
 
         public bool HasSucceeded
@@ -36,6 +38,8 @@ namespace AspNetCore.HealthCheck
 
         public IDictionary<string, object> Properties { get; private set; }
         
+        public Stopwatch Stopwatch { get; private set; }
+
         public long Elapsed { get; set; }
 
         public void Fail(string message = null, IDictionary<string, object> properties = null)

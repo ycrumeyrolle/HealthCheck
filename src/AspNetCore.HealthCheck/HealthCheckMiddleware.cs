@@ -149,7 +149,6 @@ namespace AspNetCore.HealthCheck
                 var healthCheckResponse = await _healthService.CheckHealthAsync(policy);
                 if (healthCheckResponse.HasErrors)
                 {
-                    _logger.HealthCheckFailed(healthCheckResponse);
                     response.StatusCode = StatusCodes.Status503ServiceUnavailable;
                 }
                 else

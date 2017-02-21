@@ -11,7 +11,7 @@ namespace AspNetCore.HealthCheck
     public class DefaultHealthCheckService : IHealthCheckService
     {
         private readonly ISystemClock _clock;
-        private HealthResponse _latestResult = new HealthResponse();
+        private HealthResponse _latestResponse = new HealthResponse();
         private readonly IHealthWatcherFactory _watcherFactory;
         private readonly ILogger _logger;
         private readonly Dictionary<string, WatchResultCache> _resultCache;
@@ -85,13 +85,21 @@ namespace AspNetCore.HealthCheck
                         {
                             Name = settings.Name,
                             Tags = settings.Tags,
-                            Elapsed = healthContext.Elapsed,
+                            Elapsed = healthContext.Stopwatch.ElapsedMilliseconds,
                             Message = healthContext.Message,
                             Status = healthContext.HasSucceeded ? HealthStatus.OK : healthContext.HasWarned ? HealthStatus.Warning : HealthStatus.KO,
                             Issued = utcNow.ToUnixTimeSeconds(),
                             Critical = settings.Critical,
                             Properties = healthContext.Properties?.ToDictionary(kvp => kvp.Key, kvp => JToken.FromObject(kvp.Value))
                         };
+
+                        if (!healthContext.HasSucceeded)
+                        {
+                            _logger.HealthCheckFailed(result);
+
+                            // Clear the properties object in order to avoid information leak.
+                            result.Properties = null;
+                        }
 
                         watchCache.Update(_clock.UtcNow, result);
                     }
@@ -102,13 +110,12 @@ namespace AspNetCore.HealthCheck
                             Name = settings.Name,
                             Tags = settings.Tags,
                             Elapsed = stopwatch.ElapsedMilliseconds,
-                            // TODO : Should we provide the exception message ?
-                            Message = e.Message,
+                            Message = "An error occured. See logs for more details.",
                             Status = HealthStatus.KO,
                             Issued = utcNow.ToUnixTimeSeconds(),
                             Critical = settings.Critical,
                         };
-                        _logger.LogError(0, e, e.Message);
+                        _logger.HealthCheckError(result, e);
                     }
                     finally
                     {

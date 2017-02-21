@@ -12,13 +12,7 @@ namespace AspNetCore.HealthCheck
 
             if (info.AvailableFreeSpace > settings.Threshold)
             {
-                context.Succeed(
-                    properties: new Dictionary<string, object>
-                    {
-                            { "drive", settings.Drive },
-                            { "threshold" , settings.Threshold },
-                           //{ "available_free_space", info.AvailableFreeSpace}
-                    });
+                context.Succeed();
             }
             else
             {
@@ -28,7 +22,7 @@ namespace AspNetCore.HealthCheck
                     {
                             { "drive", settings.Drive },
                             { "threshold" , settings.Threshold },
-                            //{ "available_free_space", info.AvailableFreeSpace}
+                            { "available_free_space", info.AvailableFreeSpace}
                     });
             }
 

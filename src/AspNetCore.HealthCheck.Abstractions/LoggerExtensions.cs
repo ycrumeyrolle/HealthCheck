@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
 namespace AspNetCore.HealthCheck
@@ -7,14 +6,16 @@ namespace AspNetCore.HealthCheck
     public static class LoggerExtensions
     {
         private static readonly Action<ILogger, Exception> _serverDisabled;
-        private static readonly Action<ILogger, IEnumerable<HealthCheckResult>, Exception> _healthCheckFailed;
+        private static readonly Action<ILogger, HealthCheckResult, Exception> _healthCheckFailed;
+        private static readonly Action<ILogger, HealthCheckResult, Exception> _healthCheckError;
         private static readonly Action<ILogger, Exception> _healthCheckSucceeded;
 
         static LoggerExtensions()
         {
             _serverDisabled = LoggerMessage.Define(LogLevel.Error, 0, "The server is disabled");
-            _healthCheckFailed = LoggerMessage.Define<IEnumerable<HealthCheckResult>>(LogLevel.Error, 1, "Health check has failed : {errors}");
+            _healthCheckFailed = LoggerMessage.Define<HealthCheckResult>(LogLevel.Error, 1, "Health check has failed : {result}");
             _healthCheckSucceeded = LoggerMessage.Define(LogLevel.Debug, 2, "Health check has succeeded");
+            _healthCheckError = LoggerMessage.Define<HealthCheckResult>(LogLevel.Error, 3, "Health check error : {result}");
         }
 
         public static void ServerDisabled(this ILogger logger)
@@ -22,9 +23,14 @@ namespace AspNetCore.HealthCheck
             _serverDisabled(logger, null);
         }
 
-        public static void HealthCheckFailed(this ILogger logger, HealthResponse response)
+        public static void HealthCheckError(this ILogger logger, HealthCheckResult result, Exception error)
         {
-            _healthCheckFailed(logger, response.Errors, null);
+            _healthCheckError(logger, result, error);
+        }
+
+        public static void HealthCheckFailed(this ILogger logger, HealthCheckResult result)
+        {
+            _healthCheckFailed(logger, result, null);
         }
 
         public static void HealthCheckSucceeded(this ILogger logger)
