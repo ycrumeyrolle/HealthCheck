@@ -36,6 +36,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "AspNetCore.HealthCheck.Proc
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "AspNetCore.HealthCheck.Abstractions", "src\AspNetCore.HealthCheck.Abstractions\AspNetCore.HealthCheck.Abstractions.xproj", "{B399BF95-E9AA-4C6E-9E69-F69E04A530E6}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "AspNetCore.HealthCheck.Smtp", "src\AspNetCore.HealthCheck.Smtp\AspNetCore.HealthCheck.Smtp.xproj", "{14AFECE2-A429-4081-937C-81EDB0B26500}"
+EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "AspNetCore.HealthCheck.SqlServerDb", "src\AspNetCore.HealthCheck.SqlServerDb\AspNetCore.HealthCheck.SqlServerDb.xproj", "{C6E64530-21B3-4502-8013-EF4DE097FBA8}"
 EndProject
 Global
@@ -88,6 +90,10 @@ Global
 		{B399BF95-E9AA-4C6E-9E69-F69E04A530E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B399BF95-E9AA-4C6E-9E69-F69E04A530E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B399BF95-E9AA-4C6E-9E69-F69E04A530E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14AFECE2-A429-4081-937C-81EDB0B26500}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14AFECE2-A429-4081-937C-81EDB0B26500}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14AFECE2-A429-4081-937C-81EDB0B26500}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14AFECE2-A429-4081-937C-81EDB0B26500}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C6E64530-21B3-4502-8013-EF4DE097FBA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C6E64530-21B3-4502-8013-EF4DE097FBA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6E64530-21B3-4502-8013-EF4DE097FBA8}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using AspNetCore.HealthCheck.Smtp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -71,7 +72,8 @@ namespace AspNetCore.HealthCheck.Sample
                         {
                             ctx.Succeed();
                             return TaskCache.CompletedTask;
-                        });
+                        })
+                        .AddSmtpCheck("MySmtp", smtp => smtp.WithAddress("smtp.gmail.com").OnPort(465));
                 });
 
             services.AddLogging();
