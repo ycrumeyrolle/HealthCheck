@@ -9,10 +9,6 @@ namespace AspNetCore.HealthCheck.OracleDb
     {
         private const string SelectOneSqlCommandText = "SELECT 1 FROM DUAL";
 
-        public OracleDbWatcher()
-        {
-        }
-
 #if !NETSTANDARD1_3
         public override async Task CheckHealthAsync(HealthContext context, OracleDbWatchSettings settings)
         {
