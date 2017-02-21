@@ -17,16 +17,9 @@ namespace AspNetCore.HealthCheck.SqlServerDb
                 {
                     command.CommandType = CommandType.Text;
                     command.CommandText = SelectOneCommandText;
-                    var result = (int)await command.ExecuteScalarAsync();
+                    await command.ExecuteScalarAsync();
                     connection.Close();
-                    if (result == 1)
-                    {
-                        context.Succeed();
-                    }
-                    else
-                    {
-                        context.Fail();
-                    }
+                    context.Succeed();
                 }
             }
         }
