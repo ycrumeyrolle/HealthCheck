@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 
 namespace AspNetCore.HealthCheck
 {
@@ -39,8 +40,8 @@ namespace AspNetCore.HealthCheck
         public IDictionary<string, object> Properties { get; private set; }
         
         public Stopwatch Stopwatch { get; private set; }
-
-        public long Elapsed { get; set; }
+        
+        public CancellationToken CancellationToken { get; set; }
 
         public void Fail(string message = null, IDictionary<string, object> properties = null)
         {

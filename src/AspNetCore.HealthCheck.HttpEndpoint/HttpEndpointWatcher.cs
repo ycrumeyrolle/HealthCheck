@@ -14,7 +14,7 @@ namespace AspNetCore.HealthCheck.HttpEndpoint
             var entry = await Dns.GetHostEntryAsync(requestSettings.Uri.DnsSafeHost);
 
             var properties = new Dictionary<string, object> { { "dns_resolve", context.Stopwatch.ElapsedMilliseconds } };
-            context.Stopwatch.Reset();
+            
             using (HttpClient client = new HttpClient())
             {
                 using (var request = new HttpRequestMessage(requestSettings.HttpMethod, requestSettings.Uri))
@@ -22,7 +22,7 @@ namespace AspNetCore.HealthCheck.HttpEndpoint
                     request.Headers.Add("cache-control", "no-cache");
                     settings.BeforeSend?.Invoke(request);
 
-                    using (var response = await client.SendAsync(request))
+                    using (var response = await client.SendAsync(request, context.CancellationToken))
                     {
                         if (response.IsSuccessStatusCode)
                         {

@@ -13,7 +13,7 @@ namespace AspNetCore.HealthCheck
             }
             finally
             {
-                context.Elapsed = context.Stopwatch.ElapsedMilliseconds;
+                context.Stopwatch.Start();
             }
         }
 

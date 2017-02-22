@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -60,7 +61,6 @@ namespace AspNetCore.HealthCheck
         public async Task<HealthResponse> CheckHealthAsync(HealthCheckPolicy policy)
         {
             var healthResults = new List<HealthCheckResult>();
-            var stopwatch = new Stopwatch();
 
             for (int i = 0; i < policy.WatchSettings.Count; i++)
             {
@@ -76,50 +76,54 @@ namespace AspNetCore.HealthCheck
                 }
                 else
                 {
-                    IHealthWatcher watcher = watchCache.Watcher;
-                    var healthContext = new HealthContext(settings);
-                    try
+                    using (CancellationTokenSource tcs = new CancellationTokenSource(settings.Timeout))
                     {
-                        await watcher.CheckHealthAsync(healthContext);
-                        result = new HealthCheckResult
+                        IHealthWatcher watcher = watchCache.Watcher;
+                        var healthContext = new HealthContext(settings);
+                        healthContext.CancellationToken = tcs.Token;
+                        try
                         {
-                            Name = settings.Name,
-                            Tags = settings.Tags,
-                            Elapsed = healthContext.Stopwatch.ElapsedMilliseconds,
-                            Message = healthContext.Message,
-                            Status = healthContext.HasSucceeded ? HealthStatus.OK : healthContext.HasWarned ? HealthStatus.Warning : HealthStatus.KO,
-                            Issued = utcNow.ToUnixTimeSeconds(),
-                            Critical = settings.Critical,
-                            Properties = healthContext.Properties?.ToDictionary(kvp => kvp.Key, kvp => JToken.FromObject(kvp.Value))
-                        };
+                            await watcher.CheckHealthAsync(healthContext);
+                            result = new HealthCheckResult
+                            {
+                                Name = settings.Name,
+                                Tags = settings.Tags,
+                                Elapsed = healthContext.Stopwatch.ElapsedMilliseconds,
+                                Message = healthContext.Message,
+                                Status = healthContext.HasSucceeded ? HealthStatus.OK : healthContext.HasWarned ? HealthStatus.Warning : HealthStatus.KO,
+                                Issued = utcNow.ToUnixTimeSeconds(),
+                                Critical = settings.Critical,
+                                Properties = healthContext.Properties?.ToDictionary(kvp => kvp.Key, kvp => JToken.FromObject(kvp.Value))
+                            };
 
-                        if (!healthContext.HasSucceeded)
-                        {
-                            _logger.HealthCheckFailed(result);
+                            if (!healthContext.HasSucceeded)
+                            {
+                                _logger.HealthCheckFailed(result);
 
-                            // Clear the properties object in order to avoid information leak.
-                            result.Properties = null;
+                                // Clear the properties object in order to avoid information leak.
+                                result.Properties = null;
+                            }
+
+                            watchCache.Update(_clock.UtcNow, result);
                         }
-
-                        watchCache.Update(_clock.UtcNow, result);
-                    }
-                    catch (Exception e)
-                    {
-                        result = new HealthCheckResult
+                        catch (Exception e)
                         {
-                            Name = settings.Name,
-                            Tags = settings.Tags,
-                            Elapsed = stopwatch.ElapsedMilliseconds,
-                            Message = "An error occured. See logs for more details.",
-                            Status = HealthStatus.KO,
-                            Issued = utcNow.ToUnixTimeSeconds(),
-                            Critical = settings.Critical,
-                        };
-                        _logger.HealthCheckError(result, e);
-                    }
-                    finally
-                    {
-                        healthResults.Add(result);
+                            result = new HealthCheckResult
+                            {
+                                Name = settings.Name,
+                                Tags = settings.Tags,
+                                Elapsed = healthContext.Stopwatch.ElapsedMilliseconds,
+                                Message = "An error occured. See logs for more details.",
+                                Status = HealthStatus.KO,
+                                Issued = utcNow.ToUnixTimeSeconds(),
+                                Critical = settings.Critical,
+                            };
+                            _logger.HealthCheckError(result, e);
+                        }
+                        finally
+                        {
+                            healthResults.Add(result);
+                        }
                     }
                 }
             }

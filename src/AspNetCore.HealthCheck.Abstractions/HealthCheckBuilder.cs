@@ -6,6 +6,9 @@ namespace AspNetCore.HealthCheck
 {
     public class HealthCheckBuilder
     {
+        private int _millisecondsDelay = 2000;
+        private int _frequency;
+
         /// <summary>
         /// Initializes a new <see cref = "HealthCheckBuilder"/> instance.
         /// </summary>
@@ -37,6 +40,18 @@ namespace AspNetCore.HealthCheck
             return this;
         }
 
+        public HealthCheckBuilder SetDefaultTimeout(int millisecondsDelay)
+        {
+            _millisecondsDelay = millisecondsDelay;
+            return this;
+        }
+
+        public HealthCheckBuilder SetDefaultFrequency(int frequency)
+        {
+            _frequency = frequency;
+            return this;
+        }
+
         /// <summary>
         /// Gets the <see cref = "IServiceCollection"/> where Health services are configured.
         /// </summary>
@@ -46,6 +61,20 @@ namespace AspNetCore.HealthCheck
 
         public HealthCheckPolicy Build()
         {
+            for (int i = 0; i < Settings.Count; i++)
+            {
+                var setting = Settings[i].Value;
+                if (setting.Timeout == 0)
+                {
+                    setting.Timeout = _millisecondsDelay;
+                }
+
+                if (setting.Frequency == 0)
+                {
+                    setting.Frequency = _frequency;
+                }
+            }
+
             return new HealthCheckPolicy(Settings);
         }
     }

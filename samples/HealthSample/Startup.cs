@@ -30,6 +30,7 @@ namespace AspNetCore.HealthCheck.Sample
                 .AddHealth(builder =>
                 {
                     builder
+                        .SetDefaultTimeout(1000)
                         .AddEntityFrameworkCoreCheck<MyDbContext>("myDatabase", dbContext =>
                         {
                             dbContext
@@ -73,7 +74,7 @@ namespace AspNetCore.HealthCheck.Sample
                             ctx.Succeed();
                             return TaskCache.CompletedTask;
                         })
-                        .AddSmtpCheck("MySmtp", smtp => smtp.WithAddress("smtp.gmail.com").OnPort(465));
+                        .AddSmtpCheck("MySmtp", smtp => smtp.WithAddress("smtp.gmail.com").OnPort(465).HasTag("smtp"));
                 });
 
             services.AddLogging();

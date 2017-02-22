@@ -16,7 +16,7 @@ namespace AspNetCore.HealthCheck.Smtp
         {
             using (var tcpClient = new TcpClient())
             {
-                await ForceTimeout(tcpClient.ConnectAsync(settings.SmtpAddress, settings.SmtpPort), 1000);
+                await ForceTimeout(tcpClient.ConnectAsync(settings.SmtpAddress, settings.SmtpPort), settings.Timeout);
                 await CheckSmtpServer(context, settings, tcpClient);
             }
         }
@@ -51,7 +51,7 @@ namespace AspNetCore.HealthCheck.Smtp
                 WaitHandle handle = asyncResult.AsyncWaitHandle;
                 try
                 {
-                    if (!asyncResult.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(1), false))
+                    if (!asyncResult.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(settings.Timeout), false))
                     {
                         tcpClient.Close();
                         throw new TimeoutException();

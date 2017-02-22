@@ -12,12 +12,12 @@ namespace AspNetCore.HealthCheck.SqlServerDb
         {
             using (var connection = new SqlConnection(settings.ConnectionString))
             {
-                await connection.OpenAsync();
+                await connection.OpenAsync(context.CancellationToken);
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandType = CommandType.Text;
                     command.CommandText = SelectOneCommandText;
-                    await command.ExecuteScalarAsync();
+                    await command.ExecuteScalarAsync(context.CancellationToken);
                     connection.Close();
                     context.Succeed();
                 }

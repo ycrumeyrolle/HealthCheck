@@ -14,11 +14,11 @@ namespace AspNetCore.HealthCheck.OracleDb
         {
             using (OracleConnection dbConnection = new OracleConnection(settings.ConnectionString))
             {
-                await dbConnection.OpenAsync();
+                await dbConnection.OpenAsync(context.CancellationToken);
 
                 OracleCommand oracleCommand = dbConnection.CreateCommand();
                 oracleCommand.CommandText = SelectOneSqlCommandText;
-                await oracleCommand.ExecuteScalarAsync();
+                await oracleCommand.ExecuteScalarAsync(context.CancellationToken);
 
                 context.Succeed();
             }
