@@ -1,0 +1,48 @@
+{
+  "version": "1.1.0-*",
+  "dependencies": {
+    "Microsoft.AspNetCore.Server.IISIntegration": "1.1.0-*",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.1.0",
+    "Microsoft.Extensions.Logging.Debug": "1.1.0",
+    "Microsoft.Extensions.Logging.Console": "1.1.0",
+    "AspNetCore.HealthCheck": "1.1.0-*",
+    "AspNetCore.HealthCheck.EntityFrameworkCore": "1.1.0-*",
+    "AspNetCore.HealthCheck.HttpEndpoint": "1.1.0-*",
+    "AspNetCore.HealthCheck.X509Certificate": "1.1.0-*",
+    "AspNetCore.HealthCheck.Counter": "1.1.0-*",
+    "AspNetCore.HealthCheck.Process": "1.1.0-*",
+    "AspNetCore.HealthCheck.OracleDb": "1.1.0-*",
+    "AspNetCore.HealthCheck.Smtp": "1.1.0-*",
+    "AspNetCore.HealthCheck.SqlServerDb": "1.1.0-*",
+    "Microsoft.EntityFrameworkCore": "1.1.0",
+    "Microsoft.EntityFrameworkCore.InMemory": "1.1.0"
+  },
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "preserveCompilationContext": true
+  },
+  "frameworks": {
+    "net451": {},
+    "netcoreapp1.1": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.1.0-*",
+          "type": "platform"
+        }
+      }
+    }
+  },
+  "publishOptions": {
+    "include": [
+      "web.config"
+    ]
+  },
+  "tools": {
+    "Microsoft.AspNetCore.Server.IISIntegration.Tools": {
+      "version": "1.0.0-preview2-final"
+    }
+  },
+  "scripts": {
+    "postpublish": "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%"
+  }
+}

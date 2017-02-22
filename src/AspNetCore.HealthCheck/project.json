@@ -1,0 +1,26 @@
+{
+  "version": "1.1.0-*",
+
+  "buildOptions": {
+    "warningsAsErrors": true,
+    "nowarn": [
+      "CS1591"
+    ],
+    "xmlDoc": true,
+    "optimize": true
+  },
+  "dependencies": {
+    "AspNetCore.HealthCheck.Abstractions":  "1.1.0"
+  },
+
+  "frameworks": {
+    "net451": {
+      "frameworkAssemblies": {
+      }
+    },
+    "netstandard1.3": {
+      "dependencies": {
+      }
+    }
+  }
+}
