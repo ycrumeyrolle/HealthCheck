@@ -10,6 +10,7 @@ namespace AspNetCore.Counter
         public CompositeCounterProvider(LocalCounterProvider localCounterProvider)
         {
             _localCounterProvider = localCounterProvider;
+            _counters = new Dictionary<string, ICounter>();
         }
 
         protected abstract ICounter CreateCounter(string name);
