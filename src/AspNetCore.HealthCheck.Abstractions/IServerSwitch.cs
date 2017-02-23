@@ -4,6 +4,6 @@ namespace AspNetCore.HealthCheck
 {
     public interface IServerSwitch
     {
-        Task CheckServerState(ServerSwitchContext context);
+        Task CheckServerStateAsync(ServerSwitchContext context);
     }
 }

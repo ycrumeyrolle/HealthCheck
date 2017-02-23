@@ -10,7 +10,7 @@
     <ProjectGuid>c6e64530-21b3-4502-8013-ef4de097fba8</ProjectGuid>
     <RootNamespace>AspNetCore.HealthCheck.SqlServerDb</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
-    <OutputPath Condition="'$(OutputPath)'=='' ">..\..\artifacts\bin\</OutputPath>
+    <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
   </PropertyGroup>
 

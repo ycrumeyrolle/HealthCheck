@@ -11,6 +11,6 @@ namespace Microsoft.AspNetCore.Builder
         /// <summary>
         /// Gets or set the indication the health will be always checked, even when the server is in maintenance. 
         /// </summary>
-        public bool CheckHealthEvenDisabled { get; set; } = true;
+        public bool CheckHealthEvenDisabled { get; set; }
     }
 }

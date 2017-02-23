@@ -122,7 +122,7 @@ namespace AspNetCore.HealthCheck
             }
 
             var serverSwitchContext = new ServerSwitchContext(context);
-            await _serverSwitch?.CheckServerState(serverSwitchContext);
+            await _serverSwitch?.CheckServerStateAsync(serverSwitchContext);
             var response = context.Response;
             if (serverSwitchContext.ServerDisabled)
             {

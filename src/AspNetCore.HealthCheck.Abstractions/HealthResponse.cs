@@ -4,9 +4,9 @@ namespace AspNetCore.HealthCheck
 {
     public class HealthResponse
     {
-        private static readonly HealthCheckResult[] Empty = new HealthCheckResult[0];
+        public static readonly HealthResponse Empty = new HealthResponse();
 
-        public HealthResponse()
+        private HealthResponse()
         {
             Results = new HealthCheckResult[0];
         }
