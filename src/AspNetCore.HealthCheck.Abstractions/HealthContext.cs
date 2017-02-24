@@ -53,14 +53,14 @@ namespace AspNetCore.HealthCheck
         public void Succeed(string message = null, IDictionary<string, object> properties = null)
         {
             _succeedCalled = true;
-            Message = Message;
+            Message = message;
             Properties = properties;
         }
 
         public void Warn(string message = null, IDictionary<string, object> properties = null)
         {
             _warnCalled = true;
-            Message = Message;
+            Message = message;
             Properties = properties;
         }
     }
