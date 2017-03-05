@@ -40,7 +40,9 @@ namespace AspNetCore.HealthCheck
         public IDictionary<string, object> Properties { get; private set; }
         
         public Stopwatch Stopwatch { get; private set; }
-        
+
+        public long ElapsedMilliseconds { get { return Stopwatch.ElapsedMilliseconds; } }
+
         public CancellationToken CancellationToken { get; set; }
 
         public void Fail(string message = null, IDictionary<string, object> properties = null)

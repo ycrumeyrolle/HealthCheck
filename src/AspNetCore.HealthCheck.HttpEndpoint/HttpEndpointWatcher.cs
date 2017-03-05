@@ -13,7 +13,7 @@ namespace AspNetCore.HealthCheck.HttpEndpoint
             var requestSettings = settings.Request;
             var entry = await Dns.GetHostEntryAsync(requestSettings.Uri.DnsSafeHost);
 
-            var properties = new Dictionary<string, object> { { "dns_resolve", context.Stopwatch.ElapsedMilliseconds } };
+            var properties = new Dictionary<string, object> { { "dns_resolve", context.ElapsedMilliseconds } };
             
             using (HttpClient client = new HttpClient())
             {
