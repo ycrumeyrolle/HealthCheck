@@ -86,7 +86,7 @@ namespace AspNetCore.HealthCheck
                             {
                                 Name = settings.Name,
                                 Tags = settings.Tags,
-                                Elapsed = healthContext.Stopwatch.ElapsedMilliseconds,
+                                Elapsed = healthContext.ElapsedMilliseconds,
                                 Message = healthContext.Message,
                                 Status = healthContext.HasSucceeded ? HealthStatus.OK : healthContext.HasWarned ? HealthStatus.Warning : HealthStatus.KO,
                                 Issued = utcNow.ToUnixTimeSeconds(),
@@ -110,7 +110,7 @@ namespace AspNetCore.HealthCheck
                             {
                                 Name = settings.Name,
                                 Tags = settings.Tags,
-                                Elapsed = healthContext.Stopwatch.ElapsedMilliseconds,
+                                Elapsed = healthContext.ElapsedMilliseconds,
                                 Message = "An error occured. See logs for more details.",
                                 Status = HealthStatus.KO,
                                 Issued = utcNow.ToUnixTimeSeconds(),

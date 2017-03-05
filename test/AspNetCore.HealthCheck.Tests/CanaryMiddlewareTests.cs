@@ -15,7 +15,7 @@ using Xunit;
 
 namespace AspNetCore.HealthCheck.Tests
 {
-    public class HealthCheckMiddlewareTests
+    public class CanaryMiddlewareTests
     {
         [Fact]
         public async void Invoke_WithNonMatchingPath_IgnoresRequest()
@@ -26,9 +26,9 @@ namespace AspNetCore.HealthCheck.Tests
                 return Task.FromResult<object>(null);
             };
 
-            var options = new Mock<IOptions<HealthCheckOptions>>();
+            var options = new Mock<IOptions<CanaryOptions>>();
             options.SetupGet(o => o.Value)
-                .Returns(new HealthCheckOptions() { Path = "/healthcheck" });
+                .Returns(new CanaryOptions() { Path = "/canary" });
 
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
@@ -37,86 +37,61 @@ namespace AspNetCore.HealthCheck.Tests
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
 
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy);
-            await healthCheckMiddleware.Invoke(contextMock.Object);
+            var serverSwitch = new Mock<IServerSwitch>();
+            serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()));
 
-            healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
+            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, serverSwitch.Object);
+            await canaryMiddleware.Invoke(contextMock.Object);
+
+            healthService.Verify(s  => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
         }
 
         [Fact]
-        public async void Invoke_WithNonMatchingPolicy_IgnoresRequest()
+        public async void Invoke_ServerDisabled_Returns503()
         {
-            var contextMock = GetMockContext("/healthcheck/nonmatchingpolicy");
+            var contextMock = GetMockContext("/canary");
             RequestDelegate next = _ =>
             {
                 return Task.FromResult<object>(null);
             };
 
-            var options = new Mock<IOptions<HealthCheckOptions>>();
+            var options = new Mock<IOptions<CanaryOptions>>();
             options.SetupGet(o => o.Value)
-                .Returns(new HealthCheckOptions() { Path = "/healthcheck" });
+                .Returns(new CanaryOptions() { Path = "/canary" });
 
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
                 .ReturnsAsync(HealthResponse.Empty);
 
-            var defaultPolicy = new HealthCheckBuilder(new ServiceCollection())
-                .AddCheck("test", ctx =>
-                {
-                    return TaskCache.CompletedTask;
-                }, tags: new[] { "matchingpolicy" })
-                .Build();
+            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
 
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy);
-            await healthCheckMiddleware.Invoke(contextMock.Object);
+            var serverSwitch = new Mock<IServerSwitch>();
+            serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()))
+                .Callback<ServerSwitchContext>(c => c.Disable())
+                .Returns(Task.FromResult(0));
+            
+            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, serverSwitch.Object);
+            await canaryMiddleware.Invoke(contextMock.Object);
 
+
+            serverSwitch.Verify(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()), Times.Once());
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
+            Assert.Equal(StatusCodes.Status503ServiceUnavailable, contextMock.Object.Response.StatusCode);
         }
 
         [Fact]
-        public async void Invoke_WithMatchingPolicy_IgnoresRequest()
+        public async void Invoke_ServerEnabled_Returns200()
         {
-            var contextMock = GetMockContext("/healthcheck/matchingpolicy");
+            var contextMock = GetMockContext("/canary");
             RequestDelegate next = _ =>
             {
                 return Task.FromResult<object>(null);
             };
 
-            var options = new Mock<IOptions<HealthCheckOptions>>();
+            var options = new Mock<IOptions<CanaryOptions>>();
             options.SetupGet(o => o.Value)
-                .Returns(new HealthCheckOptions() { Path = "/healthcheck" });
-
-            var loggerFactory = new LoggerFactory();
-            var healthService = new Mock<IHealthCheckService>();
-            healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(HealthResponse.Empty);
-
-            var defaultPolicy = new HealthCheckBuilder(new ServiceCollection())
-                .AddCheck("test", ctx =>
-                {
-                    return TaskCache.CompletedTask;
-                }, tags: new[] {"matchingpolicy" })
-                .Build();
-
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy);
-            await healthCheckMiddleware.Invoke(contextMock.Object);
-
-            healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Once());
-        }
-
-        [Fact]
-        public async void Invoke_ServerHealthy_Returns200()
-        {
-            var contextMock = GetMockContext("/healthcheck");
-            RequestDelegate next = _ =>
-            {
-                return Task.FromResult<object>(null);
-            };
-
-            var options = new Mock<IOptions<HealthCheckOptions>>();
-            options.SetupGet(o => o.Value)
-                .Returns(new HealthCheckOptions() { Path = "/healthcheck" });
+                .Returns(new CanaryOptions() { Path = "/canary" });
 
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
@@ -125,38 +100,16 @@ namespace AspNetCore.HealthCheck.Tests
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
 
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy);
-            await healthCheckMiddleware.Invoke(contextMock.Object);
+            var serverSwitch = new Mock<IServerSwitch>();
+            serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()))
+                .Returns(Task.FromResult(0));
 
+            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, serverSwitch.Object);
+            await canaryMiddleware.Invoke(contextMock.Object);
+
+            serverSwitch.Verify(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()), Times.Once());
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Once());
             Assert.Equal(StatusCodes.Status200OK, contextMock.Object.Response.StatusCode);
-        }
-
-        [Fact]
-        public async void Invoke_ServerUnhealthy_Returns503()
-        {
-            var contextMock = GetMockContext("/healthcheck");
-            RequestDelegate next = _ =>
-            {
-                return Task.FromResult<object>(null);
-            };
-
-            var options = new Mock<IOptions<HealthCheckOptions>>();
-            options.SetupGet(o => o.Value)
-                .Returns(new HealthCheckOptions() { Path = "/healthcheck" });
-
-            var loggerFactory = new LoggerFactory();
-            var healthService = new Mock<IHealthCheckService>();
-            healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(new HealthResponse(new List<HealthCheckResult> { new HealthCheckResult { Status = HealthStatus.KO, Critical = true } }));
-
-            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
-
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy);
-            await healthCheckMiddleware.Invoke(contextMock.Object);
-
-            healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Once());
-            Assert.Equal(StatusCodes.Status503ServiceUnavailable, contextMock.Object.Response.StatusCode);
         }
 
         private Mock<HttpContext> GetMockContext(string path)
@@ -180,7 +133,7 @@ namespace AspNetCore.HealthCheck.Tests
                 .Returns(new Mock<IHeaderDictionary>().Object);
             contextMock
                 .SetupGet(c => c.Response.Body)
-                .Returns(new MemoryStream());
+                .Returns(new Mock<Stream>().Object);
             contextMock
                 .SetupGet(c => c.User)
                 .Returns(new ClaimsPrincipal());
@@ -221,7 +174,7 @@ namespace AspNetCore.HealthCheck.Tests
                     if (options != null)
                     {
                         app.UseHealthCheck(options);
-                    }
+                    }                    
                 })
                 .ConfigureServices(services => services.AddHealth());
 

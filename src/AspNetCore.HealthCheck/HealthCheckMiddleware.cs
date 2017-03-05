@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +9,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -32,15 +30,13 @@ namespace AspNetCore.HealthCheck
         private readonly JsonSerializer _jsonSerializer;
         private readonly HealthCheckPolicy _defaultPolicy;
         private readonly Dictionary<string, HealthCheckPolicy> _subPolicies;
-        private readonly IServerSwitch _serverSwitch;
 
         public HealthCheckMiddleware(
-            RequestDelegate next, 
-            IOptions<HealthCheckOptions> options, 
-            ILoggerFactory loggerFactory, 
-            IHealthCheckService healthService, 
-            HealthCheckPolicy defaultPolicy, 
-            IServerSwitch serverSwitch)
+            RequestDelegate next,
+            IOptions<HealthCheckOptions> options,
+            ILoggerFactory loggerFactory,
+            IHealthCheckService healthService,
+            HealthCheckPolicy defaultPolicy)
         {
             if (next == null)
             {
@@ -66,13 +62,12 @@ namespace AspNetCore.HealthCheck
             {
                 throw new ArgumentNullException(nameof(defaultPolicy));
             }
-            
+
             _next = next;
             _options = options.Value;
             _logger = loggerFactory.CreateLogger<HealthCheckMiddleware>();
             _healthService = healthService;
             _defaultPolicy = defaultPolicy;
-            _serverSwitch = serverSwitch;
             _subPolicies = CreateSubPolicies(_defaultPolicy);
 
             _charPool = ArrayPool<char>.Shared;
@@ -98,7 +93,7 @@ namespace AspNetCore.HealthCheck
 
         private Dictionary<string, HealthCheckPolicy> CreateSubPolicies(HealthCheckPolicy policy)
         {
-            var result = policy.WatchSettings
+            var subPolicies = policy.WatchSettings
                 .SelectMany(s => s.Value.Tags, (s, t) => new { Tag = t, Settings = s })
                 .GroupBy(item => item.Tag)
                 .ToDictionary(
@@ -109,69 +104,52 @@ namespace AspNetCore.HealthCheck
                         return settings;
                     },
                     settings => new HealthCheckPolicy(settings)));
-            return result;
+            return subPolicies;
         }
 
         public async Task Invoke(HttpContext context)
         {
-            PathString remaining;
-            if (!context.Request.Path.StartsWithSegments(_options.Path, out remaining))
+            PathString subpath;
+            if (!context.Request.Path.StartsWithSegments(_options.Path, out subpath))
             {
                 await _next(context);
                 return;
             }
 
-            var serverSwitchContext = new ServerSwitchContext(context);
-            await _serverSwitch?.CheckServerStateAsync(serverSwitchContext);
             var response = context.Response;
-            if (serverSwitchContext.ServerDisabled)
+            HealthCheckPolicy policy;
+            if (!subpath.HasValue)
             {
-                _logger.ServerDisabled();
+                policy = _defaultPolicy;
+            }
+            else if (!_subPolicies.TryGetValue(subpath.ToUriComponent().TrimStart('/'), out policy))
+            {
+                await _next(context);
+                return;
+            }
+           
+            var healthCheckResponse = await _healthService.CheckHealthAsync(policy);
+            if (healthCheckResponse.HasCriticalErrors)
+            {
                 response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-
-                response.Headers[HeaderNames.CacheControl] = "no-cache";
-                response.Headers[HeaderNames.Pragma] = "no-cache";
-                response.Headers[HeaderNames.Expires] = "-1";
-                if (serverSwitchContext.RetryAfter.HasValue)
-                {
-                    response.Headers[HeaderNames.RetryAfter] = serverSwitchContext.RetryAfter.Value.ToString(NumberFormatInfo.InvariantInfo);
-                }
+            }
+            else
+            {
+                response.StatusCode = StatusCodes.Status200OK;
+                _logger.HealthCheckSucceeded();
             }
 
-            if (!serverSwitchContext.ServerDisabled || _options.CheckHealthEvenDisabled)
+            if (_options.SendResults)
             {
-                HealthCheckPolicy policy;
-                if (!_subPolicies.TryGetValue(remaining.ToUriComponent().TrimStart('/'), out policy))
+                response.ContentType = ApplicationJson;
+                using (var writer = new HttpResponseStreamWriter(response.Body, Encoding.UTF8, 1024, _bytePool, _charPool))
                 {
-                    policy = _defaultPolicy;
-                }
-
-                var healthCheckResponse = await _healthService.CheckHealthAsync(policy);
-                if (healthCheckResponse.HasErrors)
-                {
-                    response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-                }
-                else
-                {
-                    _logger.HealthCheckSucceeded();
-                    if (!serverSwitchContext.ServerDisabled)
+                    using (var jsonWriter = new JsonTextWriter(writer))
                     {
-                        response.StatusCode = StatusCodes.Status200OK;
-                    }
-                }
+                        jsonWriter.ArrayPool = _jsonCharPool;
+                        jsonWriter.CloseOutput = false;
 
-                if (_options.SendResults)
-                {
-                    response.ContentType = ApplicationJson;
-                    using (var writer = new HttpResponseStreamWriter(response.Body, Encoding.UTF8, 1024, _bytePool, _charPool))
-                    {
-                        using (var jsonWriter = new JsonTextWriter(writer))
-                        {
-                            jsonWriter.ArrayPool = _jsonCharPool;
-                            jsonWriter.CloseOutput = false;
-
-                            _jsonSerializer.Serialize(jsonWriter, healthCheckResponse.Results);
-                        }
+                        _jsonSerializer.Serialize(jsonWriter, healthCheckResponse.Results);
                     }
                 }
             }

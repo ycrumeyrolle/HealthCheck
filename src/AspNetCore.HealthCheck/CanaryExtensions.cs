@@ -8,15 +8,15 @@ namespace Microsoft.AspNetCore.Builder
     /// <summary>
     /// IApplicationBuilder extensions HealthCheckMiddleware.
     /// </summary>
-    public static class HealthCheckExtensions
+    public static class CanaryExtensions
     {
         /// <summary>
-        /// Enable health check endpoint.
+        /// Enable canary endpoint. 
         /// </summary>
         /// <param name="app"></param>
         /// <param name="options">Options for request path.</param>
         /// <returns></returns>
-        public static IApplicationBuilder UseHealthCheck(this IApplicationBuilder app, HealthCheckOptions options)
+        public static IApplicationBuilder UseCanary(this IApplicationBuilder app, CanaryOptions options)
         {
             if (app == null)
             {
@@ -28,16 +28,16 @@ namespace Microsoft.AspNetCore.Builder
                 throw new ArgumentNullException(nameof(options));
             }
 
-            return app.UseMiddleware<HealthCheckMiddleware>(Options.Create(options));
+            return app.UseMiddleware<CanaryMiddleware>(Options.Create(options));
         }
 
         /// <summary>
-        /// Enable health check endpoint.
+        /// Enable canary endpoint.
         /// </summary>
         /// <param name="app"></param>
         /// <param name="path">Request path.</param>
         /// <returns></returns>
-        public static IApplicationBuilder UseHealthCheck(this IApplicationBuilder app, string path)
+        public static IApplicationBuilder UseCanary(this IApplicationBuilder app, string path)
         {
             if (app == null)
             {
@@ -49,8 +49,9 @@ namespace Microsoft.AspNetCore.Builder
                 throw new ArgumentNullException(nameof(path));
             }
 
-            var options = new HealthCheckOptions { Path = new PathString(path) };
-            return app.UseHealthCheck(options);
+            var options = new CanaryOptions { Path = new PathString(path) };
+
+            return app.UseCanary(options);
         }
     }
 }
