@@ -58,75 +58,83 @@ namespace AspNetCore.HealthCheck
 
         public async Task<HealthResponse> CheckHealthAsync(HealthCheckPolicy policy)
         {
-            var healthResults = new List<HealthCheckResult>();
-
+            var taskResults = new Task<HealthCheckResult>[policy.WatchSettings.Count];
             for (int i = 0; i < policy.WatchSettings.Count; i++)
             {
                 var settings = policy.WatchSettings[i].Value;
-                var watchCache = _resultCache[settings.Name];
+                taskResults[i] = Task.Run(() => CheckHealthAsync(policy, settings));
+            }
 
-                var utcNow = _clock.UtcNow;
-                HealthCheckResult result = null;
-                if (!watchCache.ShouldCheck(utcNow))
+            var results = await Task.WhenAll(taskResults);
+            var healthResults = new List<HealthCheckResult>();
+            for (int i = 0; i < results.Length; i++)
+            {
+                healthResults.Add(results[i]);
+            }
+
+            return new HealthResponse(healthResults);
+        }
+
+        private async Task<HealthCheckResult> CheckHealthAsync(HealthCheckPolicy policy, IWatchSettings settings)
+        {
+            var watchCache = _resultCache[settings.Name];
+
+            var utcNow = _clock.UtcNow;
+            HealthCheckResult result = null;
+            if (!watchCache.ShouldCheck(utcNow))
+            {
+                result = watchCache.Result;
+            }
+            else
+            {
+                using (CancellationTokenSource tcs = new CancellationTokenSource(settings.Timeout))
                 {
-                    result = watchCache.Result;
-                    healthResults.Add(result);
-                }
-                else
-                {
-                    using (CancellationTokenSource tcs = new CancellationTokenSource(settings.Timeout))
+                    IHealthWatcher watcher = watchCache.Watcher;
+                    var healthContext = new HealthContext(settings);
+                    healthContext.CancellationToken = tcs.Token;
+                    try
                     {
-                        IHealthWatcher watcher = watchCache.Watcher;
-                        var healthContext = new HealthContext(settings);
-                        healthContext.CancellationToken = tcs.Token;
-                        try
+                        await watcher.CheckHealthAsync(healthContext);
+                        result = new HealthCheckResult
                         {
-                            await watcher.CheckHealthAsync(healthContext);
-                            result = new HealthCheckResult
-                            {
-                                Name = settings.Name,
-                                Tags = settings.Tags,
-                                Elapsed = healthContext.ElapsedMilliseconds,
-                                Message = healthContext.Message,
-                                Status = healthContext.HasSucceeded ? HealthStatus.OK : healthContext.HasWarned ? HealthStatus.Warning : HealthStatus.KO,
-                                Issued = utcNow.ToUnixTimeSeconds(),
-                                Critical = settings.Critical,
-                                Properties = healthContext.Properties?.ToDictionary(kvp => kvp.Key, kvp => JToken.FromObject(kvp.Value))
-                            };
+                            Name = settings.Name,
+                            Tags = settings.Tags,
+                            Elapsed = healthContext.ElapsedMilliseconds,
+                            Message = healthContext.Message,
+                            Status = healthContext.HasSucceeded ? HealthStatus.OK : healthContext.HasWarned ? HealthStatus.Warning : HealthStatus.KO,
+                            Issued = utcNow.ToUnixTimeSeconds(),
+                            Critical = settings.Critical,
+                            Properties = healthContext.Properties?.ToDictionary(kvp => kvp.Key, kvp => JToken.FromObject(kvp.Value))
+                        };
 
-                            if (!healthContext.HasSucceeded)
-                            {
-                                _logger.HealthCheckFailed(result);
-
-                                // Clear the properties object in order to avoid information leak.
-                                result.Properties = null;
-                            }
-
-                            watchCache.Update(_clock.UtcNow, result);
-                        }
-                        catch (Exception e)
+                        if (!healthContext.HasSucceeded)
                         {
-                            result = new HealthCheckResult
-                            {
-                                Name = settings.Name,
-                                Tags = settings.Tags,
-                                Elapsed = healthContext.ElapsedMilliseconds,
-                                Message = "An error occured. See logs for more details.",
-                                Status = HealthStatus.KO,
-                                Issued = utcNow.ToUnixTimeSeconds(),
-                                Critical = settings.Critical,
-                            };
-                            _logger.HealthCheckError(result, e);
+                            _logger.HealthCheckFailed(result);
+
+                            // Clear the properties object in order to avoid information leak.
+                            result.Properties = null;
                         }
-                        finally
+
+                        watchCache.Update(_clock.UtcNow, result);
+                    }
+                    catch (Exception e)
+                    {
+                        result = new HealthCheckResult
                         {
-                            healthResults.Add(result);
-                        }
+                            Name = settings.Name,
+                            Tags = settings.Tags,
+                            Elapsed = healthContext.ElapsedMilliseconds,
+                            Message = "An error occured. See logs for more details.",
+                            Status = HealthStatus.KO,
+                            Issued = utcNow.ToUnixTimeSeconds(),
+                            Critical = settings.Critical,
+                        };
+                        _logger.HealthCheckError(result, e);
                     }
                 }
             }
 
-            return new HealthResponse(healthResults);
+            return result;
         }
 
         private class WatchResultCache
