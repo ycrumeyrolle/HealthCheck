@@ -8,6 +8,7 @@ namespace AspNetCore.HealthCheck
         private string _thumbprint;
         private StoreName _storeName;
         private StoreLocation _storeLocation;
+        private double _expirationOffsetInMinutes;
 
         public X509CertificateHealthCheckBuilder(string name)
             : base(name)
@@ -28,6 +29,12 @@ namespace AspNetCore.HealthCheck
             _storeLocation = storeLocation;
             return this;
         }
+        
+        public X509CertificateHealthCheckBuilder WarnIfExpiresIn(double expirationOffsetInMinutes)
+        {
+            _expirationOffsetInMinutes = expirationOffsetInMinutes;
+            return this;
+        }
 
         public override X509CertificateWatchSettings Build()
         {
@@ -36,7 +43,7 @@ namespace AspNetCore.HealthCheck
                 throw new InvalidOperationException("No thumbprint is defined.");
             }
             
-            return new X509CertificateWatchSettings(Name, Critical, Frequency, Tags, _thumbprint, _storeName, _storeLocation);
+            return new X509CertificateWatchSettings(Name, Critical, Frequency, Tags, _thumbprint, _storeName, _storeLocation, _expirationOffsetInMinutes);
         }
     }
 }
