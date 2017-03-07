@@ -1,12 +1,19 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 using AspNetCore.HealthCheck.Smtp;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace AspNetCore.HealthCheck.Sample
 {
@@ -16,7 +23,7 @@ namespace AspNetCore.HealthCheck.Sample
         {
             services
                 .AddEntityFrameworkInMemoryDatabase()
-                .AddDbContext<MyDbContext>(
+                .AddDbContext<FakeDbContext>(
                     (sp, builder) =>
                         builder.UseInternalServiceProvider(sp)
                         .UseInMemoryDatabase("test"));
@@ -31,7 +38,7 @@ namespace AspNetCore.HealthCheck.Sample
                 {
                     builder
                         .SetDefaultTimeout(1000)
-                        .AddEntityFrameworkCoreCheck<MyDbContext>("myDatabase", dbContext =>
+                        .AddEntityFrameworkCoreCheck<FakeDbContext>("myDatabase", dbContext =>
                         {
                             dbContext
                                 .IsCritical()
@@ -78,6 +85,8 @@ namespace AspNetCore.HealthCheck.Sample
                 });
 
             services.AddLogging();
+            services.AddAuthentication();
+            services.AddAuthorization();
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
@@ -88,15 +97,20 @@ namespace AspNetCore.HealthCheck.Sample
 
             app.Map("/loopback", a => a.Run(ctx => ctx.Response.WriteAsync("OK")));
 
-            app.UseHealthCheck("/healthcheck");
+            app.UseMiddleware<FakeAuthenticationMiddleware>();
+            app.UseHealthCheck(new HealthCheckOptions
+            {
+                Path = "/healthcheck",
+                AuthorizationPolicy = new AuthorizationPolicyBuilder().RequireUserName("bob").Build()
+            });
 
             app.UseCanary("/canary");
         }
     }
 
-    public class MyDbContext : DbContext
+    public class FakeDbContext : DbContext
     {
-        public MyDbContext(DbContextOptions options) : base(options)
+        public FakeDbContext(DbContextOptions options) : base(options)
         {
         }
 
@@ -108,5 +122,39 @@ namespace AspNetCore.HealthCheck.Sample
         public int Id { get; set; }
 
         public string Value { get; set; }
+    }
+
+    public class FakeAuthenticationMiddleware : AuthenticationMiddleware<FakeAuthenticationOptions>
+    {
+        public FakeAuthenticationMiddleware(RequestDelegate next, IOptions<FakeAuthenticationOptions> options, ILoggerFactory loggerFactory, UrlEncoder encoder)
+            : base(next, options, loggerFactory, encoder)
+        {
+        }
+
+        protected override AuthenticationHandler<FakeAuthenticationOptions> CreateHandler()
+        {
+            return new FakeAuthenticationHandler();
+        }
+    }
+
+    public class FakeAuthenticationHandler : AuthenticationHandler<FakeAuthenticationOptions>
+    {
+        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+        {
+            if (Request.Query.ContainsKey("auth"))
+            {
+                return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "bob") })), new AuthenticationProperties(), "apikey")));
+            }
+
+            return Task.FromResult(AuthenticateResult.Skip());
+        }
+    }
+
+    public class FakeAuthenticationOptions : AuthenticationOptions
+    {
+        public FakeAuthenticationOptions()
+        {
+            AutomaticAuthenticate = true;
+        }
     }
 }
