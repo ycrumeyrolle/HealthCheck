@@ -10,7 +10,7 @@ namespace AspNetCore.HealthCheck
 
         bool Critical { get; set; }
 
-        IList<string> Tags { get; set; }
+        ICollection<string> Tags { get; set; }
 
         int Timeout { get; set; }
     }

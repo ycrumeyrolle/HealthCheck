@@ -73,6 +73,11 @@ namespace AspNetCore.HealthCheck
                 {
                     setting.Frequency = _frequency;
                 }
+
+                if (setting.Critical)
+                {
+                    setting.Tags.Add("critical");
+                }
             }
 
             return new HealthCheckPolicy(Settings);

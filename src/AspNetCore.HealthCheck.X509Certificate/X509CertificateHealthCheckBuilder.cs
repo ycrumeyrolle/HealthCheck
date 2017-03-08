@@ -14,6 +14,7 @@ namespace AspNetCore.HealthCheck
         {
             _storeName = StoreName.My;
             _storeLocation = StoreLocation.LocalMachine;
+            Tags.Add("certificates");
         }
 
         public X509CertificateHealthCheckBuilder WithThumbprint(string thumbprint)
