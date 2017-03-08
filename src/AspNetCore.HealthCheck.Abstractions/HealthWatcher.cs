@@ -13,7 +13,7 @@ namespace AspNetCore.HealthCheck
             }
             finally
             {
-                context.Stopwatch.Start();
+                context.Stopwatch.Stop();
             }
         }
 

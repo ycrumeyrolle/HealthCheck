@@ -37,9 +37,9 @@ namespace AspNetCore.HealthCheck.Sample
                                 .IsCritical()
                                 .HasTag("authentication");
                         })
-                        .AddX509CertificateCheck("OAuth2 token certificate", settings =>
+                        .AddX509CertificateCheck("OAuth2 token certificate", certificate =>
                         {
-                            settings
+                            certificate
                                 .WithThumbprint("D9B2188E2635F4DD56E4EB748FF542C960F1ABBC")
                                 .HasTag("authentication", "certificates");
                         })
@@ -54,9 +54,9 @@ namespace AspNetCore.HealthCheck.Sample
                                 .IsCritical();
                         })
 
-                        .AddX509CertificateCheck("Payment validation certificate", settings =>
+                        .AddX509CertificateCheck("Payment validation certificate", certificate =>
                         {
-                            settings
+                            certificate
                                 .WithThumbprint("40D34AC15D2561A4ED8ED2CFBFB5F24C7FA7467D")
                                 .HasTag("payment", "certificates");
                         })
@@ -88,17 +88,9 @@ namespace AspNetCore.HealthCheck.Sample
 
             app.Map("/loopback", a => a.Run(ctx => ctx.Response.WriteAsync("OK")));
 
-            app.UseHealthCheck(new HealthCheckOptions
-            {
-                Path = "/diagnostic",
-                SendResults = true
-            });
+            app.UseHealthCheck("/healthcheck");
 
-            app.UseHealthCheck(new HealthCheckOptions
-            {
-                Path = "/ping",
-                SendResults = false
-            });
+            app.UseCanary("/canary");
         }
     }
 

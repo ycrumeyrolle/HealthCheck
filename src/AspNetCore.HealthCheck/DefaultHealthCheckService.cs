@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +11,6 @@ namespace AspNetCore.HealthCheck
     public class DefaultHealthCheckService : IHealthCheckService
     {
         private readonly ISystemClock _clock;
-        private HealthResponse _latestResponse = new HealthResponse();
         private readonly IHealthWatcherFactory _watcherFactory;
         private readonly ILogger _logger;
         private readonly Dictionary<string, WatchResultCache> _resultCache;
@@ -88,7 +86,7 @@ namespace AspNetCore.HealthCheck
                             {
                                 Name = settings.Name,
                                 Tags = settings.Tags,
-                                Elapsed = healthContext.Stopwatch.ElapsedMilliseconds,
+                                Elapsed = healthContext.ElapsedMilliseconds,
                                 Message = healthContext.Message,
                                 Status = healthContext.HasSucceeded ? HealthStatus.OK : healthContext.HasWarned ? HealthStatus.Warning : HealthStatus.KO,
                                 Issued = utcNow.ToUnixTimeSeconds(),
@@ -112,7 +110,7 @@ namespace AspNetCore.HealthCheck
                             {
                                 Name = settings.Name,
                                 Tags = settings.Tags,
-                                Elapsed = healthContext.Stopwatch.ElapsedMilliseconds,
+                                Elapsed = healthContext.ElapsedMilliseconds,
                                 Message = "An error occured. See logs for more details.",
                                 Status = HealthStatus.KO,
                                 Issued = utcNow.ToUnixTimeSeconds(),
