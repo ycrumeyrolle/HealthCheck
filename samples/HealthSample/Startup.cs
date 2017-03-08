@@ -86,7 +86,6 @@ namespace AspNetCore.HealthCheck.Sample
 
             services.AddLogging();
             services.AddAuthentication();
-            services.AddAuthorization();
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
@@ -141,12 +140,7 @@ namespace AspNetCore.HealthCheck.Sample
     {
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            if (Request.Query.ContainsKey("auth"))
-            {
-                return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "bob") })), new AuthenticationProperties(), "apikey")));
-            }
-
-            return Task.FromResult(AuthenticateResult.Skip());
+            return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "bob") })), new AuthenticationProperties(), "apikey")));
         }
     }
 
