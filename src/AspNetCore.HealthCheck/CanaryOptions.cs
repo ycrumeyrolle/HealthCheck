@@ -2,10 +2,8 @@
 
 namespace Microsoft.AspNetCore.Builder
 {
-    public class HealthCheckOptions
+    public class CanaryOptions
     {
         public PathString Path { get; set; }
-
-        public bool SendResults { get; set; } = true;
     }
 }

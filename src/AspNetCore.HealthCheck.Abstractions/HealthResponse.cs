@@ -4,9 +4,9 @@ namespace AspNetCore.HealthCheck
 {
     public class HealthResponse
     {
-        private static readonly HealthCheckResult[] Empty = new HealthCheckResult[0];
+        public static readonly HealthResponse Empty = new HealthResponse();
 
-        public HealthResponse()
+        private HealthResponse()
         {
             Results = new HealthCheckResult[0];
         }
@@ -18,7 +18,7 @@ namespace AspNetCore.HealthCheck
 
         public IReadOnlyList<HealthCheckResult> Results { get; }
 
-        public bool HasErrors
+        public bool HasCriticalErrors
         {
             get
             {
@@ -26,6 +26,23 @@ namespace AspNetCore.HealthCheck
                 {
                     var result = Results[i];
                     if (result.Status != HealthStatus.OK && result.Critical)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        public bool HasErrors
+        {
+            get
+            {
+                for (int i = 0; i < Results.Count; i++)
+                {
+                    var result = Results[i];
+                    if (result.Status != HealthStatus.OK)
                     {
                         return true;
                     }

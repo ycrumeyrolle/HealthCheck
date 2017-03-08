@@ -27,7 +27,7 @@ namespace AspNetCore.HealthCheck
             _fileExists = file != null && file.Exists;
         }
         
-        public Task CheckServerState(ServerSwitchContext context)
+        public Task CheckServerStateAsync(ServerSwitchContext context)
         {
             if (_fileExists)
             {
