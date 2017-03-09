@@ -32,7 +32,7 @@ namespace AspNetCore.HealthCheck.HttpEndpoint
         {
             if (_requests.Count == 0)
             {
-                throw new InvalidOperationException("No URI is defined.");
+                throw new InvalidOperationException("No URI were defined.");
             }
             
             return new HttpEndpointCollectionWatchSettings(Name, Critical, Frequency, Tags, _requests, _onBeforeSend);

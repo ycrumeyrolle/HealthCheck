@@ -1,4 +1,6 @@
-﻿namespace AspNetCore.HealthCheck.SqlServerDb
+﻿using System;
+
+namespace AspNetCore.HealthCheck.SqlServerDb
 {
     public class SqlServerDbCheckBuilder : SettingsHealthCheckBuilder<SqlServerDbSettings>
     {
@@ -18,6 +20,11 @@
 
         public override SqlServerDbSettings Build()
         {
+            if (string.IsNullOrEmpty(_connectionString))
+            {
+                throw new InvalidOperationException("No connection string were defined.");
+            }
+
             return new SqlServerDbSettings(Name, Critical, Frequency, Tags, _connectionString);
         }
     }

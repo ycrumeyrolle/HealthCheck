@@ -1,4 +1,6 @@
-﻿namespace AspNetCore.HealthCheck.Process
+﻿using System;
+
+namespace AspNetCore.HealthCheck.Process
 {
     public class AvailableDiskSpaceHealthCheckBuilder : ThresholdHealthCheckBuilder<AvailableDiskSpaceWatchSettings>
     {
@@ -18,6 +20,11 @@
 
         public override AvailableDiskSpaceWatchSettings Build()
         {
+            if (string.IsNullOrEmpty(_drive))
+            {
+                throw new InvalidOperationException("No drive were defined.");
+            }
+
             return new AvailableDiskSpaceWatchSettings(Name, Critical, Frequency, Tags, ErrorThreshold, WarningThreshold, _drive);
         }
     }

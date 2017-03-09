@@ -28,18 +28,12 @@ namespace AspNetCore.HealthCheck
             _critical = true;
             return this;
         }
-
-        public SettingsHealthCheckBuilder<TSettings> IsNotCritical()
-        {
-            _critical = false;
-            return this;
-        }
-
+        
         public SettingsHealthCheckBuilder<TSettings> HasTag(params string[] tags)
         {
             foreach (var tag in tags)
             {
-                Tags.Add(tag);
+                _tags.Add(tag);
             }
 
             return this;

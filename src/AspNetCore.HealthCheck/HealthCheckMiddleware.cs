@@ -30,8 +30,7 @@ namespace AspNetCore.HealthCheck
         private readonly JsonArrayPool<char> _jsonCharPool;
         private readonly IHealthCheckService _healthService;
         private readonly JsonSerializer _jsonSerializer;
-        private readonly HealthCheckPolicy _defaultPolicy;
-        private readonly Dictionary<string, HealthCheckPolicy> _subPolicies;
+        private readonly Dictionary<PathString, HealthCheckPolicy> _policies;
         private readonly IAuthorizationService _authorizationService;
 
         public HealthCheckMiddleware(
@@ -76,8 +75,7 @@ namespace AspNetCore.HealthCheck
             _options = options.Value;
             _logger = loggerFactory.CreateLogger<HealthCheckMiddleware>();
             _healthService = healthService;
-            _defaultPolicy = defaultPolicy;
-            _subPolicies = CreateSubPolicies(_defaultPolicy);
+            _policies = CreatePolicies(defaultPolicy);
             _authorizationService = authorizationService;
 
             _charPool = ArrayPool<char>.Shared;
@@ -101,20 +99,21 @@ namespace AspNetCore.HealthCheck
             _jsonSerializer = JsonSerializer.Create(jsonSettings);
         }
 
-        private Dictionary<string, HealthCheckPolicy> CreateSubPolicies(HealthCheckPolicy policy)
+        private Dictionary<PathString, HealthCheckPolicy> CreatePolicies(HealthCheckPolicy policy)
         {
-            var subPolicies = policy.WatchSettings
+            var policies = policy.WatchSettings
                 .SelectMany(s => s.Value.Tags, (s, t) => new { Tag = t, Settings = s })
                 .GroupBy(item => item.Tag)
                 .ToDictionary(
-                    group => group.Key,
+                    group => new PathString("/" + group.Key),
                     group => group.Aggregate(new SettingsCollection(), (settings, item) =>
                     {
                         settings.Add(item.Settings);
                         return settings;
                     },
                     settings => new HealthCheckPolicy(settings)));
-            return subPolicies;
+            policies.Add(PathString.Empty, policy);
+            return policies;
         }
 
         public async Task Invoke(HttpContext context)
@@ -128,11 +127,7 @@ namespace AspNetCore.HealthCheck
 
             var response = context.Response;
             HealthCheckPolicy policy;
-            if (!subpath.HasValue)
-            {
-                policy = _defaultPolicy;
-            }
-            else if (!_subPolicies.TryGetValue(subpath.ToUriComponent().TrimStart('/'), out policy))
+            if (!_policies.TryGetValue(subpath.ToUriComponent().TrimEnd('/'), out policy))
             {
                 await _next(context);
                 return;

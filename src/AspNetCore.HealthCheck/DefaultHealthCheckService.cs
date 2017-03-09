@@ -87,11 +87,11 @@ namespace AspNetCore.HealthCheck
             }
             else
             {
-                using (CancellationTokenSource tcs = new CancellationTokenSource(settings.Timeout))
+                using (CancellationTokenSource cts = new CancellationTokenSource(settings.Timeout))
                 {
                     IHealthWatcher watcher = watchCache.Watcher;
                     var healthContext = new HealthContext(settings);
-                    healthContext.CancellationToken = tcs.Token;
+                    healthContext.CancellationToken = cts.Token;
                     try
                     {
                         await watcher.CheckHealthAsync(healthContext);
