@@ -15,8 +15,8 @@ namespace AspNetCore.HealthCheck
 
         public long WarningThreshold { get; set; }
 
-        public abstract bool ReachWarningThreshold(long value);
+        public abstract bool HasReachedWarningThreshold(long value);
 
-        public abstract bool ReachErrorThreshold(long value);
+        public abstract bool HasReachedErrorThreshold(long value);
     }
 }

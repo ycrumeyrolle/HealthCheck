@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AspNetCore.HealthCheck
@@ -9,7 +8,7 @@ namespace AspNetCore.HealthCheck
         public override Task CheckHealthAsync(HealthContext context, ThresholdWatchSettings settings)
         {
             var virtualMemorySize = System.Diagnostics.Process.GetCurrentProcess().VirtualMemorySize64;
-            if (settings.ReachErrorThreshold(virtualMemorySize))
+            if (settings.HasReachedErrorThreshold(virtualMemorySize))
             {
                 context.Fail(
                       $"{settings.Name} reach the threshold of {settings.ErrorThreshold} for {virtualMemorySize}",
@@ -19,7 +18,7 @@ namespace AspNetCore.HealthCheck
                         { "threshold" , settings.ErrorThreshold }
                     });
             }
-            else if (settings.ReachWarningThreshold(virtualMemorySize))
+            else if (settings.HasReachedWarningThreshold(virtualMemorySize))
             {
                 context.Warn(
                     properties: new Dictionary<string, object>

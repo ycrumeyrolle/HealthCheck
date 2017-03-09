@@ -17,23 +17,25 @@ namespace AspNetCore.HealthCheck.Counter
         {
             var counter = _counterProvider.GetCounter(settings.Name, settings.Distributed);
 
-            if (settings.ReachErrorThreshold(counter.Value))
+            if (settings.HasReachedErrorThreshold(counter.Value))
             {
                 context.Fail(
                     $"Counter {settings.Name} reach the threshold of {settings.ErrorThreshold} for {counter.Value}",
                     properties: new Dictionary<string, object>
                     {
                             { "counter", counter.Value },
-                            { "threshold" , settings.ErrorThreshold }
+                            { "warning_threshold" , settings.WarningThreshold },
+                            { "error_threshold" , settings.ErrorThreshold }
                     });
             }
-            else if (settings.ReachWarningThreshold(counter.Value))
+            else if (settings.HasReachedWarningThreshold(counter.Value))
             {
                 context.Warn(
                     properties: new Dictionary<string, object>
                     {
                         { "counter", counter.Value },
-                        { "threshold" , settings.ErrorThreshold }
+                        { "warning_threshold" , settings.WarningThreshold },
+                        { "error_threshold" , settings.ErrorThreshold }
                     });
             }
             else
@@ -42,7 +44,8 @@ namespace AspNetCore.HealthCheck.Counter
                     properties: new Dictionary<string, object>
                     {
                         { "counter", counter.Value },
-                        { "threshold" , settings.ErrorThreshold }
+                        { "warning_threshold" , settings.WarningThreshold },
+                        { "error_threshold" , settings.ErrorThreshold }
                     });
             }
 

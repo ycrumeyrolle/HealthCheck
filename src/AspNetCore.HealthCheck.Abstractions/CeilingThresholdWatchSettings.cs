@@ -9,12 +9,12 @@ namespace AspNetCore.HealthCheck
         {
         }
 
-        public override bool ReachWarningThreshold(long value)
+        public override bool HasReachedWarningThreshold(long value)
         {
             return value >= WarningThreshold;
         }
 
-        public override bool ReachErrorThreshold(long value)
+        public override bool HasReachedErrorThreshold(long value)
         {
             return value >= ErrorThreshold;
         }

@@ -10,7 +10,7 @@ namespace AspNetCore.HealthCheck
         {
             var info = new DriveInfo(settings.Drive);
 
-            if (settings.ReachErrorThreshold(info.AvailableFreeSpace))
+            if (settings.HasReachedErrorThreshold(info.AvailableFreeSpace))
             {
                 context.Fail(
                     $"Drive {settings.Drive} reach the threshold of {settings.ErrorThreshold} with {info.AvailableFreeSpace}",
@@ -21,7 +21,7 @@ namespace AspNetCore.HealthCheck
                             { "available_free_space", info.AvailableFreeSpace}
                     });
             }
-            else if (settings.ReachWarningThreshold(info.AvailableFreeSpace))
+            else if (settings.HasReachedWarningThreshold(info.AvailableFreeSpace))
             {
                 context.Warn(
                     properties: new Dictionary<string, object>
