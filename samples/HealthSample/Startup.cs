@@ -64,18 +64,38 @@ namespace AspNetCore.HealthCheck.Sample
                         .AddCounterCheck("Payment failures", counter =>
                         {
                             counter
-                                .WithThreshold(10)
+                                .WithWarningThreshold(5)
+                                .WithErrorThreshold(10)
                                 .HasTag("payment");
                         })
 
-                        //.AddVirtualMemorySizeCheck("Virtual memory check", 1024, critical: true, tag: "system")
-                        //.AddAvailableFreeSpaceCheck("Available free space on drive c", "c", 1024, tag: "system")
+                        .AddVirtualMemorySizeCheck("Virtual memory check", memory =>
+                        {
+                            memory
+                                .WithErrorThreshold(1024)
+                                .IsCritical()
+                                .HasTag("system");
+                        })
+                        .AddAvailableDiskSpaceCheck("Available free space on drive c", drive =>
+                        {
+                            drive
+                                .WithDrive("c")
+                                .WithWarningThreshold(2048)
+                                .WithErrorThreshold(1024)
+                                .IsCritical();
+                        })
                         .AddCheck("custom check", ctx =>
                         {
                             ctx.Succeed();
                             return TaskCache.CompletedTask;
                         })
-                        .AddSmtpCheck("MySmtp", smtp => smtp.WithAddress("smtp.gmail.com").OnPort(465).HasTag("smtp"));
+                        .AddSmtpCheck("MySmtp", smtp =>
+                        {
+                            smtp
+                                .WithAddress("smtp.gmail.com")
+                                .OnPort(465)
+                                .HasTag("smtp");
+                        });
                 });
 
             services.AddLogging();

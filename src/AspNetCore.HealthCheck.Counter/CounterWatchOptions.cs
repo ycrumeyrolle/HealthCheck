@@ -1,9 +1,7 @@
 ﻿namespace AspNetCore.HealthCheck
 {
-    public class CounterWatchOptions : WatchOptions
+    public class CounterWatchOptions : ThresholdWatchOptions
     {
         public bool Distributed { get; set; }
-
-        public long Threshold { get; set; }
     }
 }
