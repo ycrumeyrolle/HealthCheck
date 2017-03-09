@@ -168,7 +168,7 @@ namespace AspNetCore.HealthCheck.Tests
         }
 
         [Fact]
-        public async void Invoke_AuthZPolicyFailed_Returns404()
+        public async void Invoke_AuthZPolicyFailed_DeletageToNextMiddleware()
         {
             var contextMock = GetMockContext("/healthcheck");
             RequestDelegate next = _ =>
