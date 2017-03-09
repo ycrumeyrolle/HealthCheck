@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -37,7 +38,9 @@ namespace AspNetCore.HealthCheck.Tests
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
 
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy);
+            var authZService = new Mock<IAuthorizationService>();
+
+            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, authZService.Object);
             await healthCheckMiddleware.Invoke(contextMock.Object);
 
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
@@ -68,7 +71,9 @@ namespace AspNetCore.HealthCheck.Tests
                 }, tags: new[] { "matchingpolicy" })
                 .Build();
 
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy);
+            var authZService = new Mock<IAuthorizationService>();
+
+            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, authZService.Object);
             await healthCheckMiddleware.Invoke(contextMock.Object);
 
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
@@ -96,10 +101,11 @@ namespace AspNetCore.HealthCheck.Tests
                 .AddCheck("test", ctx =>
                 {
                     return TaskCache.CompletedTask;
-                }, tags: new[] {"matchingpolicy" })
+                }, tags: new[] { "matchingpolicy" })
                 .Build();
 
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy);
+            var authZService = new Mock<IAuthorizationService>();
+            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, authZService.Object);
             await healthCheckMiddleware.Invoke(contextMock.Object);
 
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Once());
@@ -125,7 +131,8 @@ namespace AspNetCore.HealthCheck.Tests
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
 
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy);
+            var authZService = new Mock<IAuthorizationService>();
+            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, authZService.Object);
             await healthCheckMiddleware.Invoke(contextMock.Object);
 
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Once());
@@ -152,11 +159,45 @@ namespace AspNetCore.HealthCheck.Tests
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
 
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy);
+            var authZService = new Mock<IAuthorizationService>();
+            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, authZService.Object);
             await healthCheckMiddleware.Invoke(contextMock.Object);
 
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Once());
             Assert.Equal(StatusCodes.Status503ServiceUnavailable, contextMock.Object.Response.StatusCode);
+        }
+
+        [Fact]
+        public async void Invoke_AuthZPolicyFailed_DeletageToNextMiddleware()
+        {
+            var contextMock = GetMockContext("/healthcheck");
+            RequestDelegate next = _ =>
+            {
+                return Task.FromResult<object>(null);
+            };
+
+            var options = new Mock<IOptions<HealthCheckOptions>>();
+            options.SetupGet(o => o.Value)
+                .Returns(new HealthCheckOptions()
+                {
+                    Path = "/healthcheck",
+                    AuthorizationPolicy = new AuthorizationPolicyBuilder().RequireClaim("invalid").Build()
+                });
+
+
+            var loggerFactory = new LoggerFactory();
+            var healthService = new Mock<IHealthCheckService>();
+            healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
+                .ReturnsAsync(new HealthResponse(new List<HealthCheckResult> { new HealthCheckResult { Status = HealthStatus.OK, } }));
+
+            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+
+            var authZService = new Mock<IAuthorizationService>();
+            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, authZService.Object);
+            await healthCheckMiddleware.Invoke(contextMock.Object);
+
+            healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
+            Assert.Equal(0, contextMock.Object.Response.StatusCode);
         }
 
         private Mock<HttpContext> GetMockContext(string path)

@@ -2,8 +2,10 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
@@ -30,13 +32,15 @@ namespace AspNetCore.HealthCheck
         private readonly JsonSerializer _jsonSerializer;
         private readonly HealthCheckPolicy _defaultPolicy;
         private readonly Dictionary<string, HealthCheckPolicy> _subPolicies;
+        private readonly IAuthorizationService _authorizationService;
 
         public HealthCheckMiddleware(
             RequestDelegate next,
             IOptions<HealthCheckOptions> options,
             ILoggerFactory loggerFactory,
             IHealthCheckService healthService,
-            HealthCheckPolicy defaultPolicy)
+            HealthCheckPolicy defaultPolicy,
+            IAuthorizationService authorizationService)
         {
             if (next == null)
             {
@@ -63,12 +67,18 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(defaultPolicy));
             }
 
+            if (authorizationService == null)
+            {
+                throw new ArgumentNullException(nameof(authorizationService));
+            }
+
             _next = next;
             _options = options.Value;
             _logger = loggerFactory.CreateLogger<HealthCheckMiddleware>();
             _healthService = healthService;
             _defaultPolicy = defaultPolicy;
             _subPolicies = CreateSubPolicies(_defaultPolicy);
+            _authorizationService = authorizationService;
 
             _charPool = ArrayPool<char>.Shared;
             _jsonCharPool = new JsonArrayPool<char>(_charPool);
@@ -127,7 +137,40 @@ namespace AspNetCore.HealthCheck
                 await _next(context);
                 return;
             }
-           
+
+            if (_options.AuthorizationPolicy != null)
+            {
+                // Build a ClaimsPrincipal with the Policy's required authentication types
+                if (_options.AuthorizationPolicy.AuthenticationSchemes != null && _options.AuthorizationPolicy.AuthenticationSchemes.Any())
+                {
+                    ClaimsPrincipal newPrincipal = null;
+                    foreach (var scheme in _options.AuthorizationPolicy.AuthenticationSchemes)
+                    {
+                        var result = await context.Authentication.AuthenticateAsync(scheme);
+                        if (result != null)
+                        {
+                            newPrincipal = SecurityHelper.MergeUserPrincipal(newPrincipal, result);
+                        }
+                    }
+
+                    // If all schemes failed authentication, provide a default identity anyways
+                    if (newPrincipal == null)
+                    {
+                        newPrincipal = new ClaimsPrincipal(new ClaimsIdentity());
+                    }
+
+                    context.User = newPrincipal;
+                }
+
+                // Note: Default Anonymous User is new ClaimsPrincipal(new ClaimsIdentity())
+                if (!await _authorizationService.AuthorizeAsync(context.User, context, _options.AuthorizationPolicy))
+                {
+                    _logger.AuthorizationFailed();
+                    await _next(context);
+                    return;
+                }
+            }
+
             var healthCheckResponse = await _healthService.CheckHealthAsync(policy);
             if (healthCheckResponse.HasCriticalErrors)
             {
