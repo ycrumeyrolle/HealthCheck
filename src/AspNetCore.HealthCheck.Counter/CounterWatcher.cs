@@ -19,12 +19,25 @@ namespace AspNetCore.HealthCheck.Counter
 
             if (counter.Value <= settings.Threshold)
             {
-                context.Succeed(
+                if (settings.WarningThreshold == 0L || counter.Value <= settings.WarningThreshold)
+                {
+                    context.Succeed(
                     properties: new Dictionary<string, object>
                     {
                         { "counter", counter.Value },
                         { "threshold" , settings.Threshold }
                     });
+                }
+                else
+                {
+                    context.Warn(
+                        $"Counter {settings.Name} reach the warning threshold of {settings.WarningThreshold} for {counter.Value}",
+                        properties: new Dictionary<string, object>
+                        {
+                            { "counter", counter.Value },
+                            { "threshold" , settings.WarningThreshold }
+                        });
+                }
             }
             else
             {

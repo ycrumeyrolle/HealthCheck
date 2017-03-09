@@ -20,7 +20,7 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(options));
             }
 
-            var settings = new CounterWatchSettings(options.Name, options.Critical, options.Frequency, options.Tags, options.Threshold, options.Distributed);
+            var settings = new CounterWatchSettings(options.Name, options.Critical, options.Frequency, options.Tags, options.Threshold, options.WarningThreshold, options.Distributed);
             return builder.AddCounterCheck(settings);
         }
         
