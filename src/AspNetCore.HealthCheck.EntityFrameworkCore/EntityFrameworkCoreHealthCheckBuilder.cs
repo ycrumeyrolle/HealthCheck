@@ -7,7 +7,6 @@ namespace AspNetCore.HealthCheck.EntityFrameworkCore
         public EntityFrameworkCoreHealthCheckBuilder(string name)
             : base(name)
         {
-            Tags.Add("ef");
             Tags.Add("db");
         }
 

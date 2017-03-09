@@ -41,7 +41,7 @@ namespace AspNetCore.HealthCheck
         {
             if (string.IsNullOrEmpty(_thumbprint))
             {
-                throw new InvalidOperationException("No thumbprint is defined.");
+                throw new InvalidOperationException("No thumbprint were defined.");
             }
             
             return new X509CertificateWatchSettings(Name, Critical, Frequency, Tags, _thumbprint, _storeName, _storeLocation, _expirationOffsetInMinutes);

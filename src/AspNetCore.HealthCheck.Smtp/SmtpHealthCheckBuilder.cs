@@ -1,4 +1,4 @@
-using System.Security;
+using System;
 
 namespace AspNetCore.HealthCheck.Smtp
 {
@@ -35,6 +35,11 @@ namespace AspNetCore.HealthCheck.Smtp
         
         public override SmtpWatchSettings Build()
         {
+            if (string.IsNullOrEmpty(_smtpAddress))
+            {
+                throw new InvalidOperationException("No SMTP address were defined.");
+            }
+
             return new SmtpWatchSettings(Name, Critical, Frequency, Tags, _smtpAddress, _smtpPort, _useSsl);
         }
     }

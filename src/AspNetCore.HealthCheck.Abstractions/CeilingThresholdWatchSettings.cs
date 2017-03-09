@@ -2,7 +2,7 @@
 
 namespace AspNetCore.HealthCheck
 {
-    public class CeilingThresholdWatchSettings: ThresholdWatchSettings
+    public class CeilingThresholdWatchSettings : ThresholdWatchSettings
     {
         public CeilingThresholdWatchSettings(string name, bool critical, int frequency, IEnumerable<string> tags, long errorThreshold, long warningThreshold)
             : base(name, critical, frequency, tags, errorThreshold, warningThreshold)
