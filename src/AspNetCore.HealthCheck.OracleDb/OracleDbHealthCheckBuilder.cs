@@ -9,6 +9,7 @@ namespace AspNetCore.HealthCheck.OracleDb
         public OracleDbHealthCheckBuilder(string name) 
             : base(name)
         {
+            Tags.Add("db");
         }
 
         public OracleDbHealthCheckBuilder WithConnectionString(string connectionString)
@@ -19,6 +20,11 @@ namespace AspNetCore.HealthCheck.OracleDb
 
         public override OracleDbWatchSettings Build()
         {
+            if (string.IsNullOrEmpty(_connectionString))
+            {
+                throw new InvalidOperationException("No connection string were defined.");
+            }
+
             return new OracleDbWatchSettings(Name, Critical, Frequency, Tags, _connectionString);
         }
     }

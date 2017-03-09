@@ -13,6 +13,7 @@ namespace AspNetCore.HealthCheck.HttpEndpoint
         public HttpEndpointHealthCheckBuilder(string name)
             : base(name)
         {
+            Tags.Add("http");
         }
 
         public HttpEndpointHealthCheckBuilder WithUri(string uri, string httpMethod = "GET")
@@ -31,9 +32,9 @@ namespace AspNetCore.HealthCheck.HttpEndpoint
         {
             if (_requests.Count == 0)
             {
-                throw new InvalidOperationException("No URI is defined.");
+                throw new InvalidOperationException("No URI were defined.");
             }
-
+            
             return new HttpEndpointCollectionWatchSettings(Name, Critical, Frequency, Tags, _requests, _onBeforeSend);
         }
     }

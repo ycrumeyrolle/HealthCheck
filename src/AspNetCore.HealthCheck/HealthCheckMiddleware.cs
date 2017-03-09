@@ -2,8 +2,10 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
@@ -28,15 +30,16 @@ namespace AspNetCore.HealthCheck
         private readonly JsonArrayPool<char> _jsonCharPool;
         private readonly IHealthCheckService _healthService;
         private readonly JsonSerializer _jsonSerializer;
-        private readonly HealthCheckPolicy _defaultPolicy;
-        private readonly Dictionary<string, HealthCheckPolicy> _subPolicies;
+        private readonly Dictionary<PathString, HealthCheckPolicy> _policies;
+        private readonly IAuthorizationService _authorizationService;
 
         public HealthCheckMiddleware(
             RequestDelegate next,
             IOptions<HealthCheckOptions> options,
             ILoggerFactory loggerFactory,
             IHealthCheckService healthService,
-            HealthCheckPolicy defaultPolicy)
+            HealthCheckPolicy defaultPolicy,
+            IAuthorizationService authorizationService)
         {
             if (next == null)
             {
@@ -63,12 +66,17 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(defaultPolicy));
             }
 
+            if (authorizationService == null)
+            {
+                throw new ArgumentNullException(nameof(authorizationService));
+            }
+
             _next = next;
             _options = options.Value;
             _logger = loggerFactory.CreateLogger<HealthCheckMiddleware>();
             _healthService = healthService;
-            _defaultPolicy = defaultPolicy;
-            _subPolicies = CreateSubPolicies(_defaultPolicy);
+            _policies = CreatePolicies(defaultPolicy);
+            _authorizationService = authorizationService;
 
             _charPool = ArrayPool<char>.Shared;
             _jsonCharPool = new JsonArrayPool<char>(_charPool);
@@ -91,20 +99,21 @@ namespace AspNetCore.HealthCheck
             _jsonSerializer = JsonSerializer.Create(jsonSettings);
         }
 
-        private Dictionary<string, HealthCheckPolicy> CreateSubPolicies(HealthCheckPolicy policy)
+        private Dictionary<PathString, HealthCheckPolicy> CreatePolicies(HealthCheckPolicy policy)
         {
-            var subPolicies = policy.WatchSettings
+            var policies = policy.WatchSettings
                 .SelectMany(s => s.Value.Tags, (s, t) => new { Tag = t, Settings = s })
                 .GroupBy(item => item.Tag)
                 .ToDictionary(
-                    group => group.Key,
+                    group => new PathString("/" + group.Key),
                     group => group.Aggregate(new SettingsCollection(), (settings, item) =>
                     {
                         settings.Add(item.Settings);
                         return settings;
                     },
                     settings => new HealthCheckPolicy(settings)));
-            return subPolicies;
+            policies.Add(PathString.Empty, policy);
+            return policies;
         }
 
         public async Task Invoke(HttpContext context)
@@ -118,16 +127,45 @@ namespace AspNetCore.HealthCheck
 
             var response = context.Response;
             HealthCheckPolicy policy;
-            if (!subpath.HasValue)
-            {
-                policy = _defaultPolicy;
-            }
-            else if (!_subPolicies.TryGetValue(subpath.ToUriComponent().TrimStart('/'), out policy))
+            if (!_policies.TryGetValue(subpath.ToUriComponent().TrimEnd('/'), out policy))
             {
                 await _next(context);
                 return;
             }
-           
+
+            if (_options.AuthorizationPolicy != null)
+            {
+                // Build a ClaimsPrincipal with the Policy's required authentication types
+                if (_options.AuthorizationPolicy.AuthenticationSchemes != null && _options.AuthorizationPolicy.AuthenticationSchemes.Any())
+                {
+                    ClaimsPrincipal newPrincipal = null;
+                    foreach (var scheme in _options.AuthorizationPolicy.AuthenticationSchemes)
+                    {
+                        var result = await context.Authentication.AuthenticateAsync(scheme);
+                        if (result != null)
+                        {
+                            newPrincipal = SecurityHelper.MergeUserPrincipal(newPrincipal, result);
+                        }
+                    }
+
+                    // If all schemes failed authentication, provide a default identity anyways
+                    if (newPrincipal == null)
+                    {
+                        newPrincipal = new ClaimsPrincipal(new ClaimsIdentity());
+                    }
+
+                    context.User = newPrincipal;
+                }
+
+                // Note: Default Anonymous User is new ClaimsPrincipal(new ClaimsIdentity())
+                if (!await _authorizationService.AuthorizeAsync(context.User, context, _options.AuthorizationPolicy))
+                {
+                    _logger.AuthorizationFailed();
+                    await _next(context);
+                    return;
+                }
+            }
+
             var healthCheckResponse = await _healthService.CheckHealthAsync(policy);
             if (healthCheckResponse.HasCriticalErrors)
             {

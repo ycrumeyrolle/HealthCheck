@@ -7,8 +7,9 @@ namespace AspNetCore.HealthCheck.EntityFrameworkCore
         public EntityFrameworkCoreHealthCheckBuilder(string name)
             : base(name)
         {
+            Tags.Add("db");
         }
-        
+
         public override EntityFrameworkCoreWatchSettings<TDbContext> Build()
         {
             return new EntityFrameworkCoreWatchSettings<TDbContext>(Name, Critical, Frequency, Tags);

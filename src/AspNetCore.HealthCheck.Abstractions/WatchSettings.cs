@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AspNetCore.HealthCheck
 {
@@ -16,7 +15,7 @@ namespace AspNetCore.HealthCheck
             Name = name;
             Critical = critical;
             Frequency = frequency;
-            Tags = tags.ToList();
+            Tags = new HashSet<string>(tags);
         }
 
         public string Name { get; set; }
@@ -25,7 +24,7 @@ namespace AspNetCore.HealthCheck
 
         public bool Critical { get; set; }
 
-        public IList<string> Tags { get; set; }
+        public ICollection<string> Tags { get; set; }
 
         public int Timeout { get; set; }
     }

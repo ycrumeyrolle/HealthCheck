@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
 
             services.AddOptions();
+            services.AddAuthorization();
             services.AddTransient<ISystemClock, SystemClock>();
             services.AddTransient<IHealthCheckService, DefaultHealthCheckService>();
             services.AddTransient<IHealthWatcherFactory, DefaultHealthWatcherFactory>();
