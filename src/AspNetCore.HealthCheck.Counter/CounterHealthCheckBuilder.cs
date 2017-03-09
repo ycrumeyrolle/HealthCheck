@@ -3,22 +3,23 @@
     public class CounterHealthCheckBuilder : SettingsHealthCheckBuilder<CounterWatchSettings>
     {
         private long _threshold;
+        private long _warningThreshold;
         private bool _distributed;
 
         public CounterHealthCheckBuilder(string name)
             : base(name)
         {
         }
-
-        public CounterHealthCheckBuilder WithUri(long threshold)
+        
+        public CounterHealthCheckBuilder WithThreshold(long threshold)
         {
             _threshold = threshold;
             return this;
         }
 
-        public CounterHealthCheckBuilder WithThreshold(long threshold)
+        public CounterHealthCheckBuilder WithWarningThreshold(long warningThreshold)
         {
-            _threshold = threshold;
+            _warningThreshold = warningThreshold;
             return this;
         }
 
@@ -36,7 +37,7 @@
 
         public override CounterWatchSettings Build()
         {
-            return new CounterWatchSettings(Name, Critical, Frequency, Tags, _threshold, _distributed);
+            return new CounterWatchSettings(Name, Critical, Frequency, Tags, _threshold, _warningThreshold, _distributed);
         }
     }
 }
