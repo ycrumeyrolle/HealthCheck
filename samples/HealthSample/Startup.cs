@@ -95,13 +95,6 @@ namespace AspNetCore.HealthCheck.Sample
                         {
                             ctx.Succeed();
                             return TaskCache.CompletedTask;
-                        })
-                        .AddSmtpCheck("MySmtp", smtp =>
-                        {
-                            smtp
-                                .WithAddress("smtp.gmail.com")
-                                .OnPort(465)
-                                .HasTag("smtp");
                         });
                 });
 
