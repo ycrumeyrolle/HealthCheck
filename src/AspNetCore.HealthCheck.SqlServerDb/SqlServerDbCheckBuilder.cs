@@ -7,6 +7,7 @@
         public SqlServerDbCheckBuilder(string name)
             : base(name)
         {
+            Tags.Add("db");
         }
 
         public SqlServerDbCheckBuilder WithConnectionString(string connectionString)

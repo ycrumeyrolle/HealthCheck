@@ -12,23 +12,24 @@ namespace AspNetCore.HealthCheck.Smtp
             : base(name)
         {
             _smtpPort = 25;
+            Tags.Add("smtp");
         }
 
         public SmtpHealthCheckBuilder WithAddress(string smtpAddress)
         {
-            this._smtpAddress = smtpAddress;
+            _smtpAddress = smtpAddress;
             return this;
         }
 
         public SmtpHealthCheckBuilder OnPort(int smtpPort)
         {
-            this._smtpPort = smtpPort;
+            _smtpPort = smtpPort;
             return this;
         }
 
         public SmtpHealthCheckBuilder WithSsl()
         {
-            this._useSsl = true;
+            _useSsl = true;
             return this;
         }
         

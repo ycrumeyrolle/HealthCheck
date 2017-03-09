@@ -23,7 +23,7 @@ namespace AspNetCore.HealthCheck
         public bool Critical { get; set; }
 
         [JsonIgnore]
-        public IList<string> Tags { get; set; }
+        public ICollection<string> Tags { get; set; }
 
         public override string ToString()
         {

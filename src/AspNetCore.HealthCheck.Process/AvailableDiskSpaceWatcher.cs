@@ -18,7 +18,7 @@ namespace AspNetCore.HealthCheck
                     {
                             { "drive", settings.Drive },
                             { "warning_threshold" , settings.WarningThreshold },
-                            { "error_threshold" , settings.ErrorThreshold }
+                            { "error_threshold" , settings.ErrorThreshold },
                             { "available_free_space", info.AvailableFreeSpace}
                     });
             }
@@ -29,7 +29,7 @@ namespace AspNetCore.HealthCheck
                     {
                             { "drive", settings.Drive },
                             { "warning_threshold" , settings.WarningThreshold },
-                            { "error_threshold" , settings.ErrorThreshold }
+                            { "error_threshold" , settings.ErrorThreshold },
                             { "available_free_space", info.AvailableFreeSpace}
                     });
             }

@@ -7,6 +7,7 @@
         public AvailableDiskSpaceHealthCheckBuilder(string name) 
             : base(name)
         {
+            Tags.Add("system");
         }
 
         public AvailableDiskSpaceHealthCheckBuilder WithDrive(string drive)
