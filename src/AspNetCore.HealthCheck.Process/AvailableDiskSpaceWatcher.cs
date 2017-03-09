@@ -17,7 +17,8 @@ namespace AspNetCore.HealthCheck
                     properties: new Dictionary<string, object>
                     {
                             { "drive", settings.Drive },
-                            { "threshold" , settings.ErrorThreshold },
+                            { "warning_threshold" , settings.WarningThreshold },
+                            { "error_threshold" , settings.ErrorThreshold }
                             { "available_free_space", info.AvailableFreeSpace}
                     });
             }
@@ -27,7 +28,8 @@ namespace AspNetCore.HealthCheck
                     properties: new Dictionary<string, object>
                     {
                             { "drive", settings.Drive },
-                            { "threshold" , settings.ErrorThreshold },
+                            { "warning_threshold" , settings.WarningThreshold },
+                            { "error_threshold" , settings.ErrorThreshold }
                             { "available_free_space", info.AvailableFreeSpace}
                     });
             }
