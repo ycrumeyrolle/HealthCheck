@@ -57,7 +57,8 @@ namespace AspNetCore.HealthCheck.Sample
                         .AddX509CertificateCheck("Payment validation certificate", certificate =>
                         {
                             certificate
-                                .WithThumbprint("40D34AC15D2561A4ED8ED2CFBFB5F24C7FA7467D")
+                                .WithThumbprint("d9 b2 18 8e 26 3f 54 dd 56 e4 eb 74 8f f5 42 c9 60 f1 ab bc")
+                                .WarnIfExpiresIn(1051200)
                                 .HasTag("payment", "certificates");
                         })
                         .AddCounterCheck("Payment failures", counter =>

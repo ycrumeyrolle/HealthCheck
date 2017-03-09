@@ -9,5 +9,7 @@ namespace AspNetCore.HealthCheck
         public StoreName StoreName { get; set; }
 
         public StoreLocation StoreLocation { get; set; }
+
+        public double ExpirationOffsetInMinutes { get; set; }
     }
 }

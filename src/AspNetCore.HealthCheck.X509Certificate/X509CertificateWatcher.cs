@@ -6,6 +6,13 @@ namespace AspNetCore.HealthCheck
 {
     public class X509CertificateWatcher : HealthWatcher<X509CertificateWatchSettings>
     {
+        private readonly ISystemClock _clock;
+
+        public X509CertificateWatcher(ISystemClock clock)
+        {
+            _clock = clock;
+        }
+
         public override Task CheckHealthAsync(HealthContext context, X509CertificateWatchSettings settings)
         {
             var certificate = GetCertificateFromStore(settings.StoreName, settings.StoreLocation, settings.Thumbprint);
@@ -27,6 +34,12 @@ namespace AspNetCore.HealthCheck
                 return TaskCache.CompletedTask;
             }
 #endif
+
+            if (certificate.NotAfter < _clock.UtcNow.AddMinutes(settings.ExpirationOffsetInMinutes))
+            {
+                context.Warn("Certificate will expire soon.");
+                return TaskCache.CompletedTask;
+            }
 
             context.Succeed();
 

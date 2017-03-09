@@ -18,7 +18,7 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(options));
             }
 
-            var settings = new X509CertificateWatchSettings(options.Name, options.Critical, options.Frequency, options.Tags, options.Thumbprint, options.StoreName, options.StoreLocation);
+            var settings = new X509CertificateWatchSettings(options.Name, options.Critical, options.Frequency, options.Tags, options.Thumbprint, options.StoreName, options.StoreLocation, options.ExpirationOffsetInMinutes);
             return builder.AddX509CertificateCheck(settings);
         }
 
