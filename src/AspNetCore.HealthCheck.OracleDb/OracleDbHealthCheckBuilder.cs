@@ -9,7 +9,6 @@ namespace AspNetCore.HealthCheck.OracleDb
         public OracleDbHealthCheckBuilder(string name) 
             : base(name)
         {
-            Tags.Add("oracle");
             Tags.Add("db");
         }
 

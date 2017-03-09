@@ -5,6 +5,7 @@
         public VirtualMemorySizeHealthCheckBuilder(string name) 
             : base(name)
         {
+            Tags.Add("system");
         }
 
         public override FloorThresholdWatchSettings Build()
