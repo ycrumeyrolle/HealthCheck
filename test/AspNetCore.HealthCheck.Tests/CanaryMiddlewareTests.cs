@@ -36,12 +36,11 @@ namespace AspNetCore.HealthCheck.Tests
                 .ReturnsAsync(HealthResponse.Empty);
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
-            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
             serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()));
 
-            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, serverSwitch.Object);
+            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, serverSwitch.Object);
             await canaryMiddleware.Invoke(contextMock.Object);
 
             healthService.Verify(s  => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
@@ -66,14 +65,13 @@ namespace AspNetCore.HealthCheck.Tests
                 .ReturnsAsync(HealthResponse.Empty);
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
-            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
             serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()))
                 .Callback<ServerSwitchContext>(c => c.Disable())
                 .Returns(Task.FromResult(0));
             
-            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, serverSwitch.Object);
+            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, serverSwitch.Object);
             await canaryMiddleware.Invoke(contextMock.Object);
 
 
@@ -101,13 +99,12 @@ namespace AspNetCore.HealthCheck.Tests
                 .ReturnsAsync(new HealthResponse(new List<HealthCheckResult> { new HealthCheckResult { Status = HealthStatus.OK } }));
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
-            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
             serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()))
                 .Returns(Task.FromResult(0));
 
-            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, serverSwitch.Object);
+            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, serverSwitch.Object);
             await canaryMiddleware.Invoke(contextMock.Object);
 
             serverSwitch.Verify(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()), Times.Once());
@@ -165,6 +162,8 @@ namespace AspNetCore.HealthCheck.Tests
                 .Setup(c => c.Request.HasFormContentType)
                 .Returns(true);
             return contextMock;
+
+
         }
 
         private static TestServer CreateServer(HealthCheckOptions options, Func<HttpContext, Func<Task>, Task> handlerBeforeAuth)
@@ -177,7 +176,7 @@ namespace AspNetCore.HealthCheck.Tests
                         app.UseHealthCheck(options);
                     }                    
                 })
-                .ConfigureServices(services => services.AddHealth(b => { }));
+                .ConfigureServices(services => services.AddHealth());
 
             return new TestServer(builder);
         }

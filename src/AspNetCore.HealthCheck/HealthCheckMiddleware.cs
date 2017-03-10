@@ -21,25 +21,24 @@ namespace AspNetCore.HealthCheck
     {
         private const string ApplicationJson = "application/json";
 
-        private readonly RequestDelegate _next;
         private readonly ILogger _logger;
+        private readonly RequestDelegate _next;
         private readonly HealthCheckOptions _options;
-        private readonly IHealthCheckService _healthService;
-        private readonly IHealthCheckPolicyProvider _policyProvider;
-        private readonly IAuthorizationService _authorizationService;
-
-        private readonly JsonSerializer _jsonSerializer;
         private readonly JsonSerializer serializer = new JsonSerializer();
         private readonly ArrayPool<char> _charPool;
         private readonly ArrayPool<byte> _bytePool;
         private readonly JsonArrayPool<char> _jsonCharPool;
+        private readonly IHealthCheckService _healthService;
+        private readonly JsonSerializer _jsonSerializer;
+        private readonly Dictionary<PathString, HealthCheckPolicy> _policies;
+        private readonly IAuthorizationService _authorizationService;
 
         public HealthCheckMiddleware(
             RequestDelegate next,
             IOptions<HealthCheckOptions> options,
             ILoggerFactory loggerFactory,
             IHealthCheckService healthService,
-            IHealthCheckPolicyProvider policyProvider,
+            HealthCheckPolicy defaultPolicy,
             IAuthorizationService authorizationService)
         {
             if (next == null)
@@ -62,9 +61,9 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(healthService));
             }
 
-            if (policyProvider == null)
+            if (defaultPolicy == null)
             {
-                throw new ArgumentNullException(nameof(policyProvider));
+                throw new ArgumentNullException(nameof(defaultPolicy));
             }
 
             if (authorizationService == null)
@@ -76,7 +75,7 @@ namespace AspNetCore.HealthCheck
             _options = options.Value;
             _logger = loggerFactory.CreateLogger<HealthCheckMiddleware>();
             _healthService = healthService;
-            _policyProvider = policyProvider;
+            _policies = CreatePolicies(defaultPolicy);
             _authorizationService = authorizationService;
 
             _charPool = ArrayPool<char>.Shared;
@@ -99,7 +98,24 @@ namespace AspNetCore.HealthCheck
             };
             _jsonSerializer = JsonSerializer.Create(jsonSettings);
         }
-        
+
+        private Dictionary<PathString, HealthCheckPolicy> CreatePolicies(HealthCheckPolicy policy)
+        {
+            var policies = policy.WatchSettings
+                .SelectMany(s => s.Value.Tags, (s, t) => new { Tag = t, Settings = s })
+                .GroupBy(item => item.Tag)
+                .ToDictionary(
+                    group => new PathString("/" + group.Key),
+                    group => group.Aggregate(new SettingsCollection(), (settings, item) =>
+                    {
+                        settings.Add(item.Settings);
+                        return settings;
+                    },
+                    settings => new HealthCheckPolicy(settings)));
+            policies.Add(PathString.Empty, policy);
+            return policies;
+        }
+
         public async Task Invoke(HttpContext context)
         {
             PathString subpath;
@@ -109,14 +125,9 @@ namespace AspNetCore.HealthCheck
                 return;
             }
 
-            var policyName = subpath.ToUriComponent().Trim('/');
-            if (policyName.Length == 0)
-            {
-                policyName = Constants.DefaultPolicy;
-            }
-            
-            HealthCheckPolicy policy = _policyProvider.GetPolicy(policyName);
-            if (policy == null)
+            var response = context.Response;
+            HealthCheckPolicy policy;
+            if (!_policies.TryGetValue(subpath.ToUriComponent().TrimEnd('/'), out policy))
             {
                 await _next(context);
                 return;
@@ -155,7 +166,6 @@ namespace AspNetCore.HealthCheck
                 }
             }
 
-            var response = context.Response;
             var healthCheckResponse = await _healthService.CheckHealthAsync(policy);
             if (healthCheckResponse.HasCriticalErrors)
             {
