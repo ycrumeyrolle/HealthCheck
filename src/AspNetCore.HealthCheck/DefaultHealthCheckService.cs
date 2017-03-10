@@ -16,7 +16,7 @@ namespace AspNetCore.HealthCheck
         private readonly Dictionary<string, WatchResultCache> _resultCache;
         private readonly HealthCheckPolicy _defaultPolicy;
 
-        public DefaultHealthCheckService(ISystemClock clock, HealthCheckPolicy defaultPolicy, IHealthWatcherFactory watcherFactory, ILoggerFactory loggerFactory)
+        public DefaultHealthCheckService(ISystemClock clock, IHealthCheckPolicyProvider policyProvider, IHealthWatcherFactory watcherFactory, ILoggerFactory loggerFactory)
         {
             if (watcherFactory == null)
             {
@@ -28,14 +28,19 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(clock));
             }
 
-            if (defaultPolicy == null)
+            if (loggerFactory == null)
             {
-                throw new ArgumentNullException(nameof(defaultPolicy));
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
+
+            if (policyProvider == null)
+            {
+                throw new ArgumentNullException(nameof(policyProvider));
             }
 
             _watcherFactory = watcherFactory;
             _clock = clock;
-            _defaultPolicy = defaultPolicy;
+            _defaultPolicy = policyProvider.DefaultPolicy;
             _resultCache = CreateCache();
             _logger = loggerFactory.CreateLogger<DefaultHealthCheckService>();
         }

@@ -37,10 +37,11 @@ namespace AspNetCore.HealthCheck.Tests
                 .ReturnsAsync(HealthResponse.Empty);
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var authZService = new Mock<IAuthorizationService>();
 
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, authZService.Object);
+            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, authZService.Object);
             await healthCheckMiddleware.Invoke(contextMock.Object);
 
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
@@ -70,10 +71,11 @@ namespace AspNetCore.HealthCheck.Tests
                     return TaskCache.CompletedTask;
                 }, tags: new[] { "matchingpolicy" })
                 .Build();
+            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var authZService = new Mock<IAuthorizationService>();
 
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, authZService.Object);
+            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, authZService.Object);
             await healthCheckMiddleware.Invoke(contextMock.Object);
 
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
@@ -103,9 +105,10 @@ namespace AspNetCore.HealthCheck.Tests
                     return TaskCache.CompletedTask;
                 }, tags: new[] { "matchingpolicy" })
                 .Build();
+            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var authZService = new Mock<IAuthorizationService>();
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, authZService.Object);
+            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, authZService.Object);
             await healthCheckMiddleware.Invoke(contextMock.Object);
 
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Once());
@@ -130,9 +133,10 @@ namespace AspNetCore.HealthCheck.Tests
                 .ReturnsAsync(new HealthResponse(new List<HealthCheckResult> { new HealthCheckResult { Status = HealthStatus.OK } }));
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var authZService = new Mock<IAuthorizationService>();
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, authZService.Object);
+            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, authZService.Object);
             await healthCheckMiddleware.Invoke(contextMock.Object);
 
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Once());
@@ -158,9 +162,13 @@ namespace AspNetCore.HealthCheck.Tests
                 .ReturnsAsync(new HealthResponse(new List<HealthCheckResult> { new HealthCheckResult { Status = HealthStatus.KO, Critical = true } }));
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var policyProvider = new Mock<IHealthCheckPolicyProvider>();
+            policyProvider
+                .Setup(p => p.GetPolicy(It.IsAny<string>()))
+                .Returns(defaultPolicy);
 
             var authZService = new Mock<IAuthorizationService>();
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, authZService.Object);
+            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider.Object, authZService.Object);
             await healthCheckMiddleware.Invoke(contextMock.Object);
 
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Once());
@@ -183,17 +191,17 @@ namespace AspNetCore.HealthCheck.Tests
                     Path = "/healthcheck",
                     AuthorizationPolicy = new AuthorizationPolicyBuilder().RequireClaim("invalid").Build()
                 });
-
-
+            
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
                 .ReturnsAsync(new HealthResponse(new List<HealthCheckResult> { new HealthCheckResult { Status = HealthStatus.OK, } }));
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var authZService = new Mock<IAuthorizationService>();
-            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, authZService.Object);
+            var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, authZService.Object);
             await healthCheckMiddleware.Invoke(contextMock.Object);
 
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
@@ -264,7 +272,7 @@ namespace AspNetCore.HealthCheck.Tests
                         app.UseHealthCheck(options);
                     }
                 })
-                .ConfigureServices(services => services.AddHealth());
+                .ConfigureServices(services => services.AddHealth(b => { }));
 
             return new TestServer(builder);
         }
