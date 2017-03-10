@@ -23,7 +23,7 @@ namespace AspNetCore.HealthCheck
             IOptions<CanaryOptions> options,
             ILoggerFactory loggerFactory,
             IHealthCheckService healthService,
-            IHealthCheckPolicyProvider policyProvider,
+            HealthCheckPolicy defaultPolicy,
             IServerSwitch serverSwitch)
         {
             if (next == null)
@@ -46,27 +46,17 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(healthService));
             }
 
-            if (policyProvider == null)
+            if (defaultPolicy == null)
             {
-                throw new ArgumentNullException(nameof(policyProvider));
+                throw new ArgumentNullException(nameof(defaultPolicy));
             }
 
             _next = next;
             _options = options.Value;
             _logger = loggerFactory.CreateLogger<CanaryMiddleware>();
             _healthService = healthService;
+            _defaultPolicy = defaultPolicy;
             _serverSwitch = serverSwitch;
-
-            if (_options.EnableHealthCheck)
-            {
-                var defaultPolicy = policyProvider.GetPolicy(_options.PolicyName);
-                if (defaultPolicy == null)
-                {
-                    throw new ArgumentException($"{nameof(_options.PolicyName)} '{_options.PolicyName}' is not a valid policy.", nameof(_options));
-                }
-
-                _defaultPolicy = defaultPolicy;
-            }
         }
 
         public async Task Invoke(HttpContext context)
@@ -77,24 +67,25 @@ namespace AspNetCore.HealthCheck
                 return;
             }
 
+            var serverSwitchContext = new ServerSwitchContext(context);
+            await _serverSwitch?.CheckServerStateAsync(serverSwitchContext);
             var response = context.Response;
 
             // Canary response must not be cached
             response.Headers[HeaderNames.CacheControl] = "no-cache";
             response.Headers[HeaderNames.Pragma] = "no-cache";
             response.Headers[HeaderNames.Expires] = "-1";
-            var serverSwitchContext = new ServerSwitchContext(context);
-            await _serverSwitch?.CheckServerStateAsync(serverSwitchContext);
             if (serverSwitchContext.ServerDisabled)
             {
                 _logger.ServerDisabled();
-                response.StatusCode = StatusCodes.Status503ServiceUnavailable;                
+                response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                
                 if (serverSwitchContext.RetryAfter.HasValue)
                 {
                     response.Headers[HeaderNames.RetryAfter] = serverSwitchContext.RetryAfter.Value.ToString(NumberFormatInfo.InvariantInfo);
                 }
             }
-            else if(_options.EnableHealthCheck)
+            else
             {
                 var healthCheckResponse = await _healthService.CheckHealthAsync(_defaultPolicy);
                 if (healthCheckResponse.HasCriticalErrors)
