@@ -1,31 +1,31 @@
 ﻿using System;
 
-namespace AspNetCore.HealthCheck.SqlServerDb
+namespace AspNetCore.HealthCheck.SqlServer
 {
-    public class SqlServerDbCheckBuilder : SettingsHealthCheckBuilder<SqlServerDbSettings>
+    public class SqlServerCheckBuilder : SettingsHealthCheckBuilder<SqlServerSettings>
     {
         private string _connectionString;
 
-        public SqlServerDbCheckBuilder(string name)
+        public SqlServerCheckBuilder(string name)
             : base(name)
         {
             Tags.Add("db");
         }
 
-        public SqlServerDbCheckBuilder WithConnectionString(string connectionString)
+        public SqlServerCheckBuilder WithConnectionString(string connectionString)
         {
             _connectionString = connectionString;
             return this;
         }
 
-        public override SqlServerDbSettings Build()
+        public override SqlServerSettings Build()
         {
             if (string.IsNullOrEmpty(_connectionString))
             {
                 throw new InvalidOperationException("No connection string were defined.");
             }
 
-            return new SqlServerDbSettings(Name, Critical, Frequency, Tags, _connectionString);
+            return new SqlServerSettings(Name, Critical, Frequency, Tags, _connectionString);
         }
     }
 }

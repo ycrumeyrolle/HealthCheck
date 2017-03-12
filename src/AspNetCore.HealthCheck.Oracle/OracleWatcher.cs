@@ -3,14 +3,14 @@ using Oracle.ManagedDataAccess.Client;
 #endif
 using System.Threading.Tasks;
 
-namespace AspNetCore.HealthCheck.OracleDb
+namespace AspNetCore.HealthCheck.Oracle
 {
-    public class OracleDbWatcher : HealthWatcher<OracleDbWatchSettings>
+    public class OracleWatcher : HealthWatcher<OracleWatchSettings>
     {
         private const string SelectOneSqlCommandText = "SELECT 1 FROM DUAL";
 
 #if !NETSTANDARD1_3
-        public override async Task CheckHealthAsync(HealthContext context, OracleDbWatchSettings settings)
+        public override async Task CheckHealthAsync(HealthContext context, OracleWatchSettings settings)
         {
             using (OracleConnection dbConnection = new OracleConnection(settings.ConnectionString))
             {
@@ -26,7 +26,7 @@ namespace AspNetCore.HealthCheck.OracleDb
 #endif
 
 #if NETSTANDARD1_3
-        public override Task CheckHealthAsync(HealthContext context, OracleDbWatchSettings settings)
+        public override Task CheckHealthAsync(HealthContext context, OracleWatchSettings settings)
         {
             // OracleManaged not yet compatible with netcore 
             // check forced to failed since it's not supported

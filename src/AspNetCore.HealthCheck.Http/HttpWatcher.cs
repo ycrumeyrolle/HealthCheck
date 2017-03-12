@@ -4,11 +4,11 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace AspNetCore.HealthCheck.HttpEndpoint
+namespace AspNetCore.HealthCheck.Http
 {
-    public class HttpEndpointWatcher : HealthWatcher<HttpEndpointWatchSettings>
+    public class HttpWatcher : HealthWatcher<HttpWatchSettings>
     {
-        public async override Task CheckHealthAsync(HealthContext context, HttpEndpointWatchSettings settings)
+        public async override Task CheckHealthAsync(HealthContext context, HttpWatchSettings settings)
         {
             var requestSettings = settings.Request;
             var entry = await Dns.GetHostEntryAsync(requestSettings.Uri.DnsSafeHost);

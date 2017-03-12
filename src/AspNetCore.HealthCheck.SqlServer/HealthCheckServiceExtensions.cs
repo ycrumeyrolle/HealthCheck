@@ -1,13 +1,12 @@
-﻿using System;
+using AspNetCore.HealthCheck.SqlServer;
+using System;
 using Microsoft.Extensions.Configuration;
-using AspNetCore.HealthCheck.OracleDb;
 
 namespace AspNetCore.HealthCheck
 {
-
     public static class HealthServiceExtensions
     {
-        public static HealthCheckBuilder AddOracleCheck(this HealthCheckBuilder builder, OracleDbOptions options)
+        public static HealthCheckBuilder AddSqlServerCheck(this HealthCheckBuilder builder, SqlServerOptions options)
         {
             if (builder == null)
             {
@@ -19,11 +18,11 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(options));
             }
 
-            var settings = new OracleDbWatchSettings(options.Name, options.Critical, options.Frequency, options.Tags, options.ConnectionString);
-            return builder.AddOracleCheck(settings);
+            var settings = new SqlServerSettings(options.Name, options.Critical, options.Frequency, options.Tags, options.ConnectionString);
+            return builder.AddSqlServerCheck(settings);
         }
 
-        public static HealthCheckBuilder AddOracleCheck(this HealthCheckBuilder builder, string name, Action<OracleDbHealthCheckBuilder> configureAction)
+        public static HealthCheckBuilder AddSqlServerCheck(this HealthCheckBuilder builder, string name, Action<SqlServerCheckBuilder> configureAction)
         {
             if (builder == null)
             {
@@ -40,13 +39,13 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(configureAction));
             }
 
-            var settingsBuilder = new OracleDbHealthCheckBuilder(name);
+            var settingsBuilder = new SqlServerCheckBuilder(name);
             configureAction(settingsBuilder);
             var settings = settingsBuilder.Build();
-            return builder.AddOracleCheck(settings);
+            return builder.AddSqlServerCheck(settings);
         }
 
-        public static HealthCheckBuilder AddOracleCheck(this HealthCheckBuilder builder, IConfiguration configuration)
+        public static HealthCheckBuilder AddSqlServerCheck(this HealthCheckBuilder builder, IConfiguration configuration)
         {
             if (builder == null)
             {
@@ -58,15 +57,15 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(configuration));
             }
 
-            var options = new OracleDbOptions();
+            var options = new SqlServerOptions();
             configuration.Bind(options);
 
-            return builder.AddOracleCheck(options);
+            return builder.AddSqlServerCheck(options);
         }
 
-        private static HealthCheckBuilder AddOracleCheck(this HealthCheckBuilder builder, OracleDbWatchSettings settings)
+        private static HealthCheckBuilder AddSqlServerCheck(this HealthCheckBuilder builder, SqlServerSettings settings)
         {
-            return builder.Add<OracleDbWatcher>(settings);
+            return builder.Add<SqlServerWatcher>(settings);
         }
     }
 }

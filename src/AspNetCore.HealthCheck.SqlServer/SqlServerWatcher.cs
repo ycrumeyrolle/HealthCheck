@@ -2,13 +2,13 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 
-namespace AspNetCore.HealthCheck.SqlServerDb
+namespace AspNetCore.HealthCheck.SqlServer
 {
-    public class SqlServerDbWatcher : HealthWatcher<SqlServerDbSettings>
+    public class SqlServerWatcher : HealthWatcher<SqlServerSettings>
     {
         private const string SelectOneCommandText = "SELECT 1";
 
-        public override async Task CheckHealthAsync(HealthContext context, SqlServerDbSettings settings)
+        public override async Task CheckHealthAsync(HealthContext context, SqlServerSettings settings)
         {
             using (var connection = new SqlConnection(settings.ConnectionString))
             {

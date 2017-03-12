@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.Abstractions\AspNetCore.HealthCheck.Abstractions.csproj" />
-    <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.HttpEndpoint\AspNetCore.HealthCheck.HttpEndpoint.csproj" />
+    <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.Http\AspNetCore.HealthCheck.Http.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace AspNetCore.HealthCheck.HttpEndpoint
+namespace AspNetCore.HealthCheck.Http
 {
-    public class HttpEndpointWatchOptions : WatchOptions
+    public class HttpWatchOptions : WatchOptions
     {
         public HttpRequestSettings Request { get; }
     }
