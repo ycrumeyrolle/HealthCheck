@@ -16,5 +16,7 @@ namespace AspNetCore.HealthCheck.HttpEndpoint
         public Action<HttpRequestMessage> BeforeSend { get; }
 
         public HttpRequestSettings Request { get; }
+
+        public HttpMessageHandler HttpHandler { get; set; }
     }
 }

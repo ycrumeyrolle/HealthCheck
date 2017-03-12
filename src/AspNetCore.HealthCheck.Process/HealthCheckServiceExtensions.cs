@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using AspNetCore.HealthCheck.Process;
+using AspNetCore.HealthCheck.System;
 using Microsoft.Extensions.Configuration;
 
 namespace AspNetCore.HealthCheck
@@ -67,6 +67,7 @@ namespace AspNetCore.HealthCheck
 
         private static HealthCheckBuilder AddVirtualMemorySizeCheck(this HealthCheckBuilder builder, ThresholdWatchSettings settings)
         {
+            builder.Services.TryAddTransient<IVirtualMemorySizeProvider, DefaultVirtualMemorySizeProvider>();
             return builder.Add<VirtualMemorySizeWatcher>(settings);
         }
         
@@ -129,6 +130,7 @@ namespace AspNetCore.HealthCheck
 
         private static HealthCheckBuilder AddAvailableDiskSpaceCheck(this HealthCheckBuilder builder, AvailableDiskSpaceWatchSettings settings)
         {
+            builder.Services.TryAddTransient<IFreeSpaceProvider, DefaultFreeSpaceProvider>();
             return builder.Add<AvailableDiskSpaceWatcher>(settings);
         }
     }

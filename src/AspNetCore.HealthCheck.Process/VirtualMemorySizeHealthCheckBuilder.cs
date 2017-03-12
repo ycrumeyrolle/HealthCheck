@@ -1,4 +1,4 @@
-﻿namespace AspNetCore.HealthCheck.Process
+﻿namespace AspNetCore.HealthCheck.System
 {
     public class VirtualMemorySizeHealthCheckBuilder : ThresholdHealthCheckBuilder<FloorThresholdWatchSettings>
     {

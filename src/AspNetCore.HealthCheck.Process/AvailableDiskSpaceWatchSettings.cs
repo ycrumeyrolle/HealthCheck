@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AspNetCore.HealthCheck
+namespace AspNetCore.HealthCheck.System
 {
     public class AvailableDiskSpaceWatchSettings : FloorThresholdWatchSettings
     {

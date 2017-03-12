@@ -1,13 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AspNetCore.HealthCheck
+namespace AspNetCore.HealthCheck.System
 {
     public class VirtualMemorySizeWatcher : HealthWatcher<ThresholdWatchSettings>
     {
+        private readonly IVirtualMemorySizeProvider _virtualMemorySizeProvider;
+
+        public VirtualMemorySizeWatcher(IVirtualMemorySizeProvider virtualMemorySizeProvider)
+        {
+            _virtualMemorySizeProvider = virtualMemorySizeProvider;
+        }
+
         public override Task CheckHealthAsync(HealthContext context, ThresholdWatchSettings settings)
         {
-            var virtualMemorySize = System.Diagnostics.Process.GetCurrentProcess().VirtualMemorySize64;
+            var virtualMemorySize = _virtualMemorySizeProvider.GetVirtualMemorySize();
             if (settings.HasReachedErrorThreshold(virtualMemorySize))
             {
                 context.Fail(
