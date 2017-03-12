@@ -15,7 +15,7 @@ namespace AspNetCore.HealthCheck.HttpEndpoint
 
             var properties = new Dictionary<string, object> { { "dns_resolve", context.ElapsedMilliseconds } };
             
-            using (HttpClient client = new HttpClient())
+            using (HttpClient client = new HttpClient(settings.HttpHandler ?? new HttpClientHandler()))
             {
                 using (var request = new HttpRequestMessage(requestSettings.HttpMethod, requestSettings.Uri))
                 {

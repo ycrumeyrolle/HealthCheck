@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26206.0
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D8A178DB-9C77-461F-8C32-31AD2152B225}"
 	ProjectSection(SolutionItems) = preProject
@@ -43,7 +43,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.SqlS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Tests", "test\AspNetCore.HealthCheck.Tests\AspNetCore.HealthCheck.Tests.csproj", "{F0C2E411-314A-49EA-A544-20D94BD1C7FD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.HttpEndpoint.Tests", "test\AspNetCore.HealthCheck.Http.Tests\AspNetCore.HealthCheck.HttpEndpoint.Tests.csproj", "{28F7E11A-DA01-4D01-A9F9-EFAB2A68914B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.System.Tests", "test\AspNetCore.HealthCheck.System.Tests\AspNetCore.HealthCheck.System.Tests.csproj", "{09057880-2B01-4A34-8391-093A9EAD1178}"
+EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -109,6 +116,14 @@ Global
 		{F0C2E411-314A-49EA-A544-20D94BD1C7FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F0C2E411-314A-49EA-A544-20D94BD1C7FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F0C2E411-314A-49EA-A544-20D94BD1C7FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28F7E11A-DA01-4D01-A9F9-EFAB2A68914B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28F7E11A-DA01-4D01-A9F9-EFAB2A68914B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28F7E11A-DA01-4D01-A9F9-EFAB2A68914B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28F7E11A-DA01-4D01-A9F9-EFAB2A68914B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09057880-2B01-4A34-8391-093A9EAD1178}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09057880-2B01-4A34-8391-093A9EAD1178}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09057880-2B01-4A34-8391-093A9EAD1178}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09057880-2B01-4A34-8391-093A9EAD1178}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -117,5 +132,7 @@ Global
 		{90A0BA47-5095-4CAF-93CE-E14DD79B4A05} = {222D2731-6057-4E7F-865F-70D2A96B69F0}
 		{89199389-0E0D-4768-B72F-CAA02F567250} = {222D2731-6057-4E7F-865F-70D2A96B69F0}
 		{F0C2E411-314A-49EA-A544-20D94BD1C7FD} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
+		{28F7E11A-DA01-4D01-A9F9-EFAB2A68914B} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
+		{09057880-2B01-4A34-8391-093A9EAD1178} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
 	EndGlobalSection
 EndGlobal

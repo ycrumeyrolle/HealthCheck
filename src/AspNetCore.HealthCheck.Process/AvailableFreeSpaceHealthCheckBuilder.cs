@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AspNetCore.HealthCheck.Process
+namespace AspNetCore.HealthCheck.System
 {
     public class AvailableDiskSpaceHealthCheckBuilder : ThresholdHealthCheckBuilder<AvailableDiskSpaceWatchSettings>
     {
