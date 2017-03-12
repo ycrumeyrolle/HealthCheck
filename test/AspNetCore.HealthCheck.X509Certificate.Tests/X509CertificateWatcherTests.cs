@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Moq;
@@ -56,16 +57,16 @@ namespace AspNetCore.HealthCheck.X509Certificate.Tests
         [Fact]
         public async Task CheckHealthAsync_Unhealthy_ThrowsException()
         {
-            //var watcher = new HttpEndpointWatcher();
+            var certificateResolver = new Mock<ICertificateResolver>();
+            certificateResolver
+                .Setup(r => r.ResolveCertificate(It.IsAny<StoreName>(), It.IsAny<StoreLocation>(), It.IsAny<string>()))
+                .Throws(new CryptographicException());
+            var watcher = new X509CertificateWatcher(new TestClock(DateTime.UtcNow), certificateResolver.Object);
 
-            //var httpSettings = new HttpRequestSettings() { HttpMethod = HttpMethod.Get, Uri = new Uri("http://localhost") };
-            //var settings = new HttpEndpointWatchSettings("http", false, 0, null, httpSettings);
-            //var context = new HealthContext(settings);
-            //var httpHandler = new TestHttpMessageHandler();
-            //httpHandler.Sender = r => throw new HttpRequestException();
-            //settings.HttpHandler = httpHandler;
+            var settings = new X509CertificateWatchSettings("x509", false, 0, null, "thumbprint", StoreName.My, StoreLocation.CurrentUser, 1440.0);
+            var context = new HealthContext(settings);
 
-            //await Assert.ThrowsAsync<HttpRequestException>(async () => await watcher.CheckHealthAsync(context, settings));
+            await Assert.ThrowsAsync<CryptographicException>(async () => await watcher.CheckHealthAsync(context, settings));
         }
 
         private class TestClock : ISystemClock
