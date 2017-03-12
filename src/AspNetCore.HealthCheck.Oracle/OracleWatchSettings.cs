@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 
-namespace AspNetCore.HealthCheck.OracleDb
+namespace AspNetCore.HealthCheck.Oracle
 {
-    public class OracleDbWatchSettings : WatchSettings
+    public class OracleWatchSettings : WatchSettings
     {
-        public OracleDbWatchSettings(string name, bool critical, int frequency, IEnumerable<string> tags, string connectionString) 
+        public OracleWatchSettings(string name, bool critical, int frequency, IEnumerable<string> tags, string connectionString) 
             : base(name, critical, frequency, tags)
         {
             ConnectionString = connectionString;

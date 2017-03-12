@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <VersionPrefix>1.1.0</VersionPrefix>
@@ -19,15 +19,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.Http\AspNetCore.HealthCheck.Http.csproj" />
+    <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.Oracle\AspNetCore.HealthCheck.Oracle.csproj" />
+    <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.SqlServer\AspNetCore.HealthCheck.SqlServer.csproj" />
+    <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.System\AspNetCore.HealthCheck.System.csproj" />
     <ProjectReference Include="..\..\src\AspNetCore.HealthCheck\AspNetCore.HealthCheck.csproj" />
     <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.EntityFrameworkCore\AspNetCore.HealthCheck.EntityFrameworkCore.csproj" />
-    <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.HttpEndpoint\AspNetCore.HealthCheck.HttpEndpoint.csproj" />
     <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.X509Certificate\AspNetCore.HealthCheck.X509Certificate.csproj" />
     <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.Counter\AspNetCore.HealthCheck.Counter.csproj" />
-    <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.Process\AspNetCore.HealthCheck.Process.csproj" />
-    <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.OracleDb\AspNetCore.HealthCheck.OracleDb.csproj" />
     <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.Smtp\AspNetCore.HealthCheck.Smtp.csproj" />
-    <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.SqlServerDb\AspNetCore.HealthCheck.SqlServerDb.csproj" />
   </ItemGroup>
 
   <ItemGroup>

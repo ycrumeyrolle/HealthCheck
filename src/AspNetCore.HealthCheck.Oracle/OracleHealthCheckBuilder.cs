@@ -1,31 +1,31 @@
 using System;
 
-namespace AspNetCore.HealthCheck.OracleDb
+namespace AspNetCore.HealthCheck.Oracle
 {
-    public class OracleDbHealthCheckBuilder : SettingsHealthCheckBuilder<OracleDbWatchSettings>
+    public class OracleHealthCheckBuilder : SettingsHealthCheckBuilder<OracleWatchSettings>
     {
         private string _connectionString;
 
-        public OracleDbHealthCheckBuilder(string name) 
+        public OracleHealthCheckBuilder(string name) 
             : base(name)
         {
             Tags.Add("db");
         }
 
-        public OracleDbHealthCheckBuilder WithConnectionString(string connectionString)
+        public OracleHealthCheckBuilder WithConnectionString(string connectionString)
         {
             _connectionString = connectionString;
             return this;
         }
 
-        public override OracleDbWatchSettings Build()
+        public override OracleWatchSettings Build()
         {
             if (string.IsNullOrEmpty(_connectionString))
             {
                 throw new InvalidOperationException("No connection string were defined.");
             }
 
-            return new OracleDbWatchSettings(Name, Critical, Frequency, Tags, _connectionString);
+            return new OracleWatchSettings(Name, Critical, Frequency, Tags, _connectionString);
         }
     }
 }

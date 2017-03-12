@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Net.Http;
 
-namespace AspNetCore.HealthCheck.HttpEndpoint
+namespace AspNetCore.HealthCheck.Http
 {
-    public class HttpEndpointCollectionWatchSettings : WatchSettings
+    public class HttpCollectionWatchSettings : WatchSettings
     {
-        public HttpEndpointCollectionWatchSettings(string name, bool critical, int frequency, IEnumerable<string> tags, IList<HttpRequestSettings> requests, Action<HttpRequestMessage> beforeSend = null)
+        public HttpCollectionWatchSettings(string name, bool critical, int frequency, IEnumerable<string> tags, IList<HttpRequestSettings> requests, Action<HttpRequestMessage> beforeSend = null)
             : base(name, critical, frequency, tags)
         {
             Requests = requests;

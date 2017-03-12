@@ -1,18 +1,18 @@
 ﻿using System;
-using AspNetCore.HealthCheck.HttpEndpoint;
+using AspNetCore.HealthCheck.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace AspNetCore.HealthCheck
 {
     public static class HealthServiceExtensions
     {
-        public static HealthCheckBuilder AddHttpEndpointCheck(this HealthCheckBuilder builder, HttpEndpointWatchOptions options)
+        public static HealthCheckBuilder AddHttpEndpointCheck(this HealthCheckBuilder builder, HttpWatchOptions options)
         {
-            var settings = new HttpEndpointWatchSettings(options.Name, options.Critical, options.Frequency, options.Tags, options.Request);
-            return builder.Add<HttpEndpointWatcher>(settings);
+            var settings = new HttpWatchSettings(options.Name, options.Critical, options.Frequency, options.Tags, options.Request);
+            return builder.Add<HttpWatcher>(settings);
         }
 
-        public static HealthCheckBuilder AddHttpEndpointCheck(this HealthCheckBuilder builder, string name, Action<HttpEndpointHealthCheckBuilder> configureAction)
+        public static HealthCheckBuilder AddHttpEndpointCheck(this HealthCheckBuilder builder, string name, Action<HttpHealthCheckBuilder> configureAction)
         {
             if (builder == null)
             {
@@ -29,7 +29,7 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(configureAction));
             }
 
-            var settingsBuilder = new HttpEndpointHealthCheckBuilder(name);
+            var settingsBuilder = new HttpHealthCheckBuilder(name);
             configureAction(settingsBuilder);
             var settingsCollection = settingsBuilder.Build();
 
@@ -37,7 +37,7 @@ namespace AspNetCore.HealthCheck
             {
                 var request = settingsCollection.Requests[i];
                 var settingsName = settingsCollection.Requests.Count > 1 ? $"{settingsCollection.Name} {i+1}" : settingsCollection.Name;                
-                var settings = new HttpEndpointWatchSettings(settingsName, settingsCollection.Critical, settingsCollection.Frequency, settingsCollection.Tags, request, settingsCollection.BeforeSend);
+                var settings = new HttpWatchSettings(settingsName, settingsCollection.Critical, settingsCollection.Frequency, settingsCollection.Tags, request, settingsCollection.BeforeSend);
                 builder.AddHttpEndpointCheck(settings);
             }
 
@@ -56,15 +56,15 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(configuration));
             }
 
-            var options = new HttpEndpointWatchOptions();
+            var options = new HttpWatchOptions();
             configuration.Bind(options);
 
             return builder.AddHttpEndpointCheck(options);
         }
 
-        private static HealthCheckBuilder AddHttpEndpointCheck(this HealthCheckBuilder builder, HttpEndpointWatchSettings settings)
+        private static HealthCheckBuilder AddHttpEndpointCheck(this HealthCheckBuilder builder, HttpWatchSettings settings)
         {
-            return builder.Add<HttpEndpointWatcher>(settings);
+            return builder.Add<HttpWatcher>(settings);
         }
     }
 }

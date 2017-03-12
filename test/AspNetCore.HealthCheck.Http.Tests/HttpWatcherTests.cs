@@ -5,17 +5,17 @@ using System.Threading.Tasks;
 using Moq;
 using Xunit;
 
-namespace AspNetCore.HealthCheck.HttpEndpoint.Tests
+namespace AspNetCore.HealthCheck.Http.Tests
 {
     public class HttpWatcherTests
     {
         [Fact]
         public async Task CheckHealthAsync_Healthy_CheckSucceeded()
         {
-            var watcher = new HttpEndpointWatcher();
+            var watcher = new HttpWatcher();
 
             var httpSettings = new HttpRequestSettings() { HttpMethod = HttpMethod.Get, Uri = new Uri("http://localhost") };
-            var settings = new HttpEndpointWatchSettings("http", false, 0, null, httpSettings);
+            var settings = new HttpWatchSettings("http", false, 0, null, httpSettings);
             var context = new HealthContext(settings);
             var httpHandler = new TestHttpMessageHandler();
             httpHandler.Sender = r => new HttpResponseMessage(HttpStatusCode.OK);
@@ -29,10 +29,10 @@ namespace AspNetCore.HealthCheck.HttpEndpoint.Tests
         [Fact]
         public async Task CheckHealthAsync_UnhealthyStatusCode_CheckFailed()
         {
-            var watcher = new HttpEndpointWatcher();
+            var watcher = new HttpWatcher();
 
             var httpSettings = new HttpRequestSettings() { HttpMethod = HttpMethod.Get, Uri = new Uri("http://localhost") };
-            var settings = new HttpEndpointWatchSettings("http", false, 0, null, httpSettings);
+            var settings = new HttpWatchSettings("http", false, 0, null, httpSettings);
             var context = new HealthContext(settings);
             var httpHandler = new TestHttpMessageHandler();
             httpHandler.Sender = r => new HttpResponseMessage(HttpStatusCode.BadRequest);
@@ -46,10 +46,10 @@ namespace AspNetCore.HealthCheck.HttpEndpoint.Tests
         [Fact]
         public async Task CheckHealthAsync_Unhealthy_ThrowsException()
         {
-            var watcher = new HttpEndpointWatcher();
+            var watcher = new HttpWatcher();
 
             var httpSettings = new HttpRequestSettings() { HttpMethod = HttpMethod.Get, Uri = new Uri("http://localhost") };
-            var settings = new HttpEndpointWatchSettings("http", false, 0, null, httpSettings);
+            var settings = new HttpWatchSettings("http", false, 0, null, httpSettings);
             var context = new HealthContext(settings);
             var httpHandler = new TestHttpMessageHandler();
             httpHandler.Sender = r => throw new HttpRequestException();
