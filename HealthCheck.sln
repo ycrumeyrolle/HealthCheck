@@ -50,6 +50,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Counter.Tests", "test\AspNetCore.HealthCheck.Counter.Tests\AspNetCore.HealthCheck.Counter.Tests.csproj", "{C90A0805-031A-4161-AFF9-7875A403D230}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.X509Certificate.Tests", "test\AspNetCore.HealthCheck.X509Certificate.Tests\AspNetCore.HealthCheck.X509Certificate.Tests.csproj", "{56ADBE75-3025-4BAB-8589-BA1FC2A3DA87}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.HealthCheck.Redis", "src\AspNetCore.HealthCheck.Redis\AspNetCore.HealthCheck.Redis.csproj", "{DB658915-C43F-4956-A860-578E14C047BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.HealthCheck.Redis.Tests", "test\AspNetCore.HealthCheck.Redis.Tests\AspNetCore.HealthCheck.Redis.Tests.csproj", "{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}"
 EndProject
 Global
 	GlobalSection(Performance) = preSolution
@@ -136,6 +139,14 @@ Global
 		{56ADBE75-3025-4BAB-8589-BA1FC2A3DA87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56ADBE75-3025-4BAB-8589-BA1FC2A3DA87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56ADBE75-3025-4BAB-8589-BA1FC2A3DA87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB658915-C43F-4956-A860-578E14C047BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB658915-C43F-4956-A860-578E14C047BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB658915-C43F-4956-A860-578E14C047BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB658915-C43F-4956-A860-578E14C047BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -148,11 +159,6 @@ Global
 		{09057880-2B01-4A34-8391-093A9EAD1178} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
 		{C90A0805-031A-4161-AFF9-7875A403D230} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
 		{56ADBE75-3025-4BAB-8589-BA1FC2A3DA87} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
+		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
 	EndGlobalSection
 EndGlobal

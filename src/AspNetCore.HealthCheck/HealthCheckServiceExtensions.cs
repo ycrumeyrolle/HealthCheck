@@ -5,7 +5,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class HealthCheckServiceExtensions
     {
-        public static IServiceCollection AddHealth(this IServiceCollection services)
+        private static IServiceCollection AddHealth(this IServiceCollection services)
         {
             if (services == null)
             {
@@ -30,7 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddHealth();
             var builder = new HealthCheckBuilder(services);
             configureBuilder(builder);
-            services.AddSingleton(builder.Build());
+            services.AddSingleton<IHealthCheckPolicyProvider>(new DefaultHealthCheckPolicyProvider(builder.Build()));
             return services;
         }
 
