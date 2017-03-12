@@ -15,7 +15,7 @@ namespace AspNetCore.HealthCheck
             Name = name;
             Critical = critical;
             Frequency = frequency;
-            Tags = new HashSet<string>(tags);
+            Tags = tags == null ? new HashSet<string>() : new HashSet<string>(tags);
         }
 
         public string Name { get; set; }
