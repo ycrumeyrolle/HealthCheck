@@ -1,4 +1,4 @@
-namespace AspNetCore.HealthCheck.Redis
+namespace AspNetCore.HealthCheck
 {
     public class RedisWatchOptions : WatchOptions 
     {
