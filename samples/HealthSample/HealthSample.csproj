@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <VersionPrefix>1.1.0</VersionPrefix>
-    <TargetFrameworks>net451;netcoreapp1.1</TargetFrameworks>
+    <TargetFrameworks>net452;netcoreapp1.1</TargetFrameworks>
     <RuntimeIdentifiers>win7-x64;win7-x86;osx.10.10-x64;osx.10.11-x64;ubuntu.14.04-x64;ubuntu.16.04-x64;centos.7-x64;rhel.7.2-x64;debian.8-x64;fedora.23-x64;opensuse.13.2-x64</RuntimeIdentifiers>
-    <RuntimeIdentifier Condition=" '$(TargetFramework)' == 'net451' ">win7-x86</RuntimeIdentifier>
+    <RuntimeIdentifier Condition=" '$(TargetFramework)' == 'net452' ">win7-x86</RuntimeIdentifier>
     <PreserveCompilationContext>true</PreserveCompilationContext>
     <AssemblyName>HealthSample</AssemblyName>
     <OutputType>Exe</OutputType>
@@ -32,15 +32,15 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="1.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Server.IISIntegration" Version="1.1.0-*" />
-    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="1.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.IISIntegration" Version="1.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="1.1.1" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
