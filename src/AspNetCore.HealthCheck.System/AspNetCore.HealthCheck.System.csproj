@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AspNetCore.HealthCheck.Abstractions\AspNetCore.HealthCheck.Abstractions.csproj" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.1.0-*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.1.1" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
