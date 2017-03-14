@@ -19,7 +19,7 @@ namespace AspNetCore.HealthCheck.Tests
     public class HealthCheckMiddlewareTests
     {
         [Fact]
-        public async void Invoke_WithNonMatchingPath_IgnoresRequest()
+        public async Task Invoke_WithNonMatchingPath_IgnoresRequest()
         {
             var contextMock = GetMockContext("/nonmatchingpath");
             RequestDelegate next = _ =>
@@ -48,7 +48,7 @@ namespace AspNetCore.HealthCheck.Tests
         }
 
         [Fact]
-        public async void Invoke_WithNonMatchingPolicy_IgnoresRequest()
+        public async Task Invoke_WithNonMatchingPolicy_IgnoresRequest()
         {
             var contextMock = GetMockContext("/healthcheck/nonmatchingpolicy");
             RequestDelegate next = _ =>
@@ -82,7 +82,7 @@ namespace AspNetCore.HealthCheck.Tests
         }
 
         [Fact]
-        public async void Invoke_WithMatchingPolicy_IgnoresRequest()
+        public async Task Invoke_WithMatchingPolicy_IgnoresRequest()
         {
             var contextMock = GetMockContext("/healthcheck/matchingpolicy");
             RequestDelegate next = _ =>
@@ -115,7 +115,7 @@ namespace AspNetCore.HealthCheck.Tests
         }
 
         [Fact]
-        public async void Invoke_ServerHealthy_Returns200()
+        public async Task Invoke_ServerHealthy_Returns200()
         {
             var contextMock = GetMockContext("/healthcheck");
             RequestDelegate next = _ =>
@@ -144,7 +144,7 @@ namespace AspNetCore.HealthCheck.Tests
         }
 
         [Fact]
-        public async void Invoke_ServerUnhealthy_Returns503()
+        public async Task Invoke_ServerUnhealthy_Returns503()
         {
             var contextMock = GetMockContext("/healthcheck");
             RequestDelegate next = _ =>
@@ -176,7 +176,7 @@ namespace AspNetCore.HealthCheck.Tests
         }
 
         [Fact]
-        public async void Invoke_AuthZPolicyFailed_DeletageToNextMiddleware()
+        public async Task Invoke_AuthZPolicyFailed_DeletageToNextMiddleware()
         {
             var contextMock = GetMockContext("/healthcheck");
             RequestDelegate next = _ =>
