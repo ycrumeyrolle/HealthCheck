@@ -177,7 +177,7 @@ namespace AspNetCore.HealthCheck
                 _logger.HealthCheckSucceeded();
             }
 
-            if (_options.SendResults)
+            if (_options.SendResults && !HttpMethods.IsHead(context.Request.Method))
             {
                 response.ContentType = ApplicationJson;
                 using (var writer = new HttpResponseStreamWriter(response.Body, Encoding.UTF8, 1024, _bytePool, _charPool))

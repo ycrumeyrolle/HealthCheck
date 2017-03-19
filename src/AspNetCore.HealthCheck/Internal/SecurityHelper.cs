@@ -30,6 +30,7 @@ namespace AspNetCore.HealthCheck
             {
                 newPrincipal.AddIdentities(existingPrincipal.Identities.Where(i => i.IsAuthenticated || i.Claims.Any()));
             }
+
             return newPrincipal;
         }
     }

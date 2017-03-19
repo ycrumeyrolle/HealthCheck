@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HealthSample", "samples\Hea
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.EntityFrameworkCore", "src\AspNetCore.HealthCheck.EntityFrameworkCore\AspNetCore.HealthCheck.EntityFrameworkCore.csproj", "{6F3E2235-0E5F-4B5E-A311-0F445CE6ADED}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.HttpEndpoint", "src\AspNetCore.HealthCheck.HttpEndpoint\AspNetCore.HealthCheck.HttpEndpoint.csproj", "{D428F8D6-2A50-4AE4-800F-2E634D29107E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Http", "src\AspNetCore.HealthCheck.Http\AspNetCore.HealthCheck.Http.csproj", "{D428F8D6-2A50-4AE4-800F-2E634D29107E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck", "src\AspNetCore.HealthCheck\AspNetCore.HealthCheck.csproj", "{500BB99F-171B-46CE-A146-67E4DECBE797}"
 EndProject
@@ -31,17 +31,29 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CounterSample", "samples\Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Counter", "src\AspNetCore.HealthCheck.Counter\AspNetCore.HealthCheck.Counter.csproj", "{E7846C57-D4B7-4878-A6A4-6A8A00328F40}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Process", "src\AspNetCore.HealthCheck.Process\AspNetCore.HealthCheck.Process.csproj", "{941A7438-D794-4BA5-AA18-32BA8552015B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.System", "src\AspNetCore.HealthCheck.System\AspNetCore.HealthCheck.System.csproj", "{941A7438-D794-4BA5-AA18-32BA8552015B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Abstractions", "src\AspNetCore.HealthCheck.Abstractions\AspNetCore.HealthCheck.Abstractions.csproj", "{B399BF95-E9AA-4C6E-9E69-F69E04A530E6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.OracleDb", "src\AspNetCore.HealthCheck.OracleDb\AspNetCore.HealthCheck.OracleDb.csproj", "{89A3BA4D-277E-4DC0-B05C-4EFE74C47EBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Oracle", "src\AspNetCore.HealthCheck.Oracle\AspNetCore.HealthCheck.Oracle.csproj", "{89A3BA4D-277E-4DC0-B05C-4EFE74C47EBD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Smtp", "src\AspNetCore.HealthCheck.Smtp\AspNetCore.HealthCheck.Smtp.csproj", "{14AFECE2-A429-4081-937C-81EDB0B26500}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.SqlServerDb", "src\AspNetCore.HealthCheck.SqlServerDb\AspNetCore.HealthCheck.SqlServerDb.csproj", "{C6E64530-21B3-4502-8013-EF4DE097FBA8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.SqlServer", "src\AspNetCore.HealthCheck.SqlServer\AspNetCore.HealthCheck.SqlServer.csproj", "{C6E64530-21B3-4502-8013-EF4DE097FBA8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Tests", "test\AspNetCore.HealthCheck.Tests\AspNetCore.HealthCheck.Tests.csproj", "{F0C2E411-314A-49EA-A544-20D94BD1C7FD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Http.Tests", "test\AspNetCore.HealthCheck.Http.Tests\AspNetCore.HealthCheck.Http.Tests.csproj", "{28F7E11A-DA01-4D01-A9F9-EFAB2A68914B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.System.Tests", "test\AspNetCore.HealthCheck.System.Tests\AspNetCore.HealthCheck.System.Tests.csproj", "{09057880-2B01-4A34-8391-093A9EAD1178}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Counter.Tests", "test\AspNetCore.HealthCheck.Counter.Tests\AspNetCore.HealthCheck.Counter.Tests.csproj", "{C90A0805-031A-4161-AFF9-7875A403D230}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.X509Certificate.Tests", "test\AspNetCore.HealthCheck.X509Certificate.Tests\AspNetCore.HealthCheck.X509Certificate.Tests.csproj", "{56ADBE75-3025-4BAB-8589-BA1FC2A3DA87}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.HealthCheck.Redis", "src\AspNetCore.HealthCheck.Redis\AspNetCore.HealthCheck.Redis.csproj", "{DB658915-C43F-4956-A860-578E14C047BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.HealthCheck.Redis.Tests", "test\AspNetCore.HealthCheck.Redis.Tests\AspNetCore.HealthCheck.Redis.Tests.csproj", "{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -109,6 +121,30 @@ Global
 		{F0C2E411-314A-49EA-A544-20D94BD1C7FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F0C2E411-314A-49EA-A544-20D94BD1C7FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F0C2E411-314A-49EA-A544-20D94BD1C7FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28F7E11A-DA01-4D01-A9F9-EFAB2A68914B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28F7E11A-DA01-4D01-A9F9-EFAB2A68914B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28F7E11A-DA01-4D01-A9F9-EFAB2A68914B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28F7E11A-DA01-4D01-A9F9-EFAB2A68914B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09057880-2B01-4A34-8391-093A9EAD1178}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09057880-2B01-4A34-8391-093A9EAD1178}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09057880-2B01-4A34-8391-093A9EAD1178}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09057880-2B01-4A34-8391-093A9EAD1178}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C90A0805-031A-4161-AFF9-7875A403D230}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C90A0805-031A-4161-AFF9-7875A403D230}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C90A0805-031A-4161-AFF9-7875A403D230}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C90A0805-031A-4161-AFF9-7875A403D230}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56ADBE75-3025-4BAB-8589-BA1FC2A3DA87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56ADBE75-3025-4BAB-8589-BA1FC2A3DA87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56ADBE75-3025-4BAB-8589-BA1FC2A3DA87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56ADBE75-3025-4BAB-8589-BA1FC2A3DA87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB658915-C43F-4956-A860-578E14C047BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB658915-C43F-4956-A860-578E14C047BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB658915-C43F-4956-A860-578E14C047BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB658915-C43F-4956-A860-578E14C047BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -117,5 +153,13 @@ Global
 		{90A0BA47-5095-4CAF-93CE-E14DD79B4A05} = {222D2731-6057-4E7F-865F-70D2A96B69F0}
 		{89199389-0E0D-4768-B72F-CAA02F567250} = {222D2731-6057-4E7F-865F-70D2A96B69F0}
 		{F0C2E411-314A-49EA-A544-20D94BD1C7FD} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
+		{28F7E11A-DA01-4D01-A9F9-EFAB2A68914B} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
+		{09057880-2B01-4A34-8391-093A9EAD1178} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
+		{C90A0805-031A-4161-AFF9-7875A403D230} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
+		{56ADBE75-3025-4BAB-8589-BA1FC2A3DA87} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
+		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

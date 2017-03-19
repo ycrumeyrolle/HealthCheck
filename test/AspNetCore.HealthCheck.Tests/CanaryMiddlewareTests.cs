@@ -18,7 +18,7 @@ namespace AspNetCore.HealthCheck.Tests
     public class CanaryMiddlewareTests
     {
         [Fact]
-        public async void Invoke_WithNonMatchingPath_IgnoresRequest()
+        public async Task Invoke_WithNonMatchingPath_IgnoresRequest()
         {
             var contextMock = GetMockContext("/nonmatchingpath");
             RequestDelegate next = _ =>
@@ -47,7 +47,7 @@ namespace AspNetCore.HealthCheck.Tests
         }
 
         [Fact]
-        public async void Invoke_ServerDisabled_Returns503()
+        public async Task Invoke_ServerDisabled_Returns503()
         {
             var contextMock = GetMockContext("/canary");
             RequestDelegate next = _ =>
@@ -81,7 +81,7 @@ namespace AspNetCore.HealthCheck.Tests
         }
 
         [Fact]
-        public async void Invoke_ServerEnabled_Returns200()
+        public async Task Invoke_ServerEnabled_Returns200()
         {
             var contextMock = GetMockContext("/canary");
             RequestDelegate next = _ =>

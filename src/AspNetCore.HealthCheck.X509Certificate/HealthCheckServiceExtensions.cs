@@ -65,6 +65,7 @@ namespace AspNetCore.HealthCheck
 
         private static HealthCheckBuilder AddX509CertificateCheck(this HealthCheckBuilder builder, X509CertificateWatchSettings settings)
         {
+            builder.Services.TryAddTransient<ICertificateResolver, CertificateResolver>();
             builder.Services.TryAddTransient(typeof(X509CertificateWatcher));
             return builder.Add<X509CertificateWatcher>(settings);
         }

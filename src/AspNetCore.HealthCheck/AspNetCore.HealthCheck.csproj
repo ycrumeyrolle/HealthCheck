@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <VersionPrefix>1.1.0</VersionPrefix>
-    <TargetFrameworks>net451;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>net452;netstandard1.3</TargetFrameworks>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -18,7 +18,7 @@
     <ProjectReference Include="..\AspNetCore.HealthCheck.Abstractions\AspNetCore.HealthCheck.Abstractions.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
