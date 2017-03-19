@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
+using System.Security.Claims;
+using System.Security.Principal;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -17,6 +21,7 @@ namespace AspNetCore.HealthCheck
         private readonly IHealthCheckService _healthService;
         private readonly HealthCheckPolicy _defaultPolicy;
         private readonly IServerSwitch _serverSwitch;
+        private readonly IAuthorizationService _authorizationService;
 
         public CanaryMiddleware(
             RequestDelegate next,
@@ -24,7 +29,8 @@ namespace AspNetCore.HealthCheck
             ILoggerFactory loggerFactory,
             IHealthCheckService healthService,
             IHealthCheckPolicyProvider policyProvider,
-            IServerSwitch serverSwitch)
+            IServerSwitch serverSwitch,
+            IAuthorizationService authorizationService)
         {
             if (next == null)
             {
@@ -51,11 +57,17 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(policyProvider));
             }
 
+            if (authorizationService == null)
+            {
+                throw new ArgumentNullException(nameof(authorizationService));
+            }
+
             _next = next;
             _options = options.Value;
             _logger = loggerFactory.CreateLogger<CanaryMiddleware>();
             _healthService = healthService;
             _serverSwitch = serverSwitch;
+            _authorizationService = authorizationService;
 
             if (_options.EnableHealthCheck)
             {
@@ -75,6 +87,19 @@ namespace AspNetCore.HealthCheck
             {
                 await _next(context);
                 return;
+            }
+
+            if (_options.AuthorizationPolicy != null)
+            {
+                var authorizationPolicy = _options.AuthorizationPolicy;
+                var principal = await SecurityHelper.GetUserPrincipal(context, authorizationPolicy);
+                
+                if (!await _authorizationService.AuthorizeAsync(principal, context, authorizationPolicy))
+                {
+                    _logger.AuthorizationFailed();
+                    await _next(context);
+                    return;
+                }
             }
 
             var response = context.Response;

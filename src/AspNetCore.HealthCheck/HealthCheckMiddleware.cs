@@ -124,30 +124,10 @@ namespace AspNetCore.HealthCheck
 
             if (_options.AuthorizationPolicy != null)
             {
-                // Build a ClaimsPrincipal with the Policy's required authentication types
-                if (_options.AuthorizationPolicy.AuthenticationSchemes != null && _options.AuthorizationPolicy.AuthenticationSchemes.Any())
-                {
-                    ClaimsPrincipal newPrincipal = null;
-                    foreach (var scheme in _options.AuthorizationPolicy.AuthenticationSchemes)
-                    {
-                        var result = await context.Authentication.AuthenticateAsync(scheme);
-                        if (result != null)
-                        {
-                            newPrincipal = SecurityHelper.MergeUserPrincipal(newPrincipal, result);
-                        }
-                    }
+                var authorizationPolicy = _options.AuthorizationPolicy;
+                var principal = await SecurityHelper.GetUserPrincipal(context, authorizationPolicy);
 
-                    // If all schemes failed authentication, provide a default identity anyways
-                    if (newPrincipal == null)
-                    {
-                        newPrincipal = new ClaimsPrincipal(new ClaimsIdentity());
-                    }
-
-                    context.User = newPrincipal;
-                }
-
-                // Note: Default Anonymous User is new ClaimsPrincipal(new ClaimsIdentity())
-                if (!await _authorizationService.AuthorizeAsync(context.User, context, _options.AuthorizationPolicy))
+                if (!await _authorizationService.AuthorizeAsync(principal, context, authorizationPolicy))
                 {
                     _logger.AuthorizationFailed();
                     await _next(context);

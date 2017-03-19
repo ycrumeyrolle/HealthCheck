@@ -14,12 +14,12 @@ namespace AspNetCore.HealthCheck
 
         static LoggerExtensions()
         {
-            _serverDisabled = LoggerMessage.Define(LogLevel.Error, 0, "The server is disabled");
+            _serverDisabled = LoggerMessage.Define(LogLevel.Error, 0, "The server is disabled.");
             _healthCheckFailed = LoggerMessage.Define<HealthCheckResult>(LogLevel.Error, 1, "Health check has failed : {result}");
-            _healthCheckSucceeded = LoggerMessage.Define(LogLevel.Debug, 2, "Health check has succeeded");
+            _healthCheckSucceeded = LoggerMessage.Define(LogLevel.Debug, 2, "Health check has succeeded.");
             _healthCheckError = LoggerMessage.Define<HealthCheckResult>(LogLevel.Error, 3, "Health check error : {result}");
 
-            _authorizationFailed = LoggerMessage.Define(LogLevel.Error, 4, "Authoriation has failed.");
+            _authorizationFailed = LoggerMessage.Define(LogLevel.Error, 4, "Authorization has failed.");
      }
 
         public static void ServerDisabled(this ILogger logger)

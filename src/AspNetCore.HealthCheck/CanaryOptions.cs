@@ -1,4 +1,5 @@
 ﻿using AspNetCore.HealthCheck;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.AspNetCore.Builder
@@ -10,5 +11,7 @@ namespace Microsoft.AspNetCore.Builder
         public string PolicyName { get; set; } = Constants.DefaultPolicy;
 
         public bool EnableHealthCheck { get; set; } = true;
+
+        public AuthorizationPolicy AuthorizationPolicy { get; set; }
     }
 }

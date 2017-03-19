@@ -1,5 +1,8 @@
 ﻿using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 
 namespace AspNetCore.HealthCheck
 {
@@ -32,6 +35,33 @@ namespace AspNetCore.HealthCheck
             }
 
             return newPrincipal;
+        }
+
+        public static async Task<ClaimsPrincipal> GetUserPrincipal(HttpContext context, AuthorizationPolicy authorizationPolicy)
+        {
+            // Build a ClaimsPrincipal with the Policy's required authentication types
+            if (authorizationPolicy.AuthenticationSchemes != null && authorizationPolicy.AuthenticationSchemes.Any())
+            {
+                ClaimsPrincipal newPrincipal = null;
+                foreach (var scheme in authorizationPolicy.AuthenticationSchemes)
+                {
+                    var result = await context.Authentication.AuthenticateAsync(scheme);
+                    if (result != null)
+                    {
+                        newPrincipal = SecurityHelper.MergeUserPrincipal(newPrincipal, result);
+                    }
+                }
+
+                // If all schemes failed authentication, provide a default identity anyways
+                if (newPrincipal == null)
+                {
+                    newPrincipal = new ClaimsPrincipal(new ClaimsIdentity());
+                }
+
+                return newPrincipal;
+            }
+
+            return context.User;
         }
     }
 }

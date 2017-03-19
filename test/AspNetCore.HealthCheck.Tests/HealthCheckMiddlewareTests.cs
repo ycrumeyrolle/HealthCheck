@@ -176,7 +176,7 @@ namespace AspNetCore.HealthCheck.Tests
         }
 
         [Fact]
-        public async Task Invoke_AuthZPolicyFailed_DeletageToNextMiddleware()
+        public async Task Invoke_AuthZPolicyFailed_DelegateToNextMiddleware()
         {
             var contextMock = GetMockContext("/healthcheck");
             RequestDelegate next = _ =>
@@ -191,7 +191,7 @@ namespace AspNetCore.HealthCheck.Tests
                     Path = "/healthcheck",
                     AuthorizationPolicy = new AuthorizationPolicyBuilder().RequireClaim("invalid").Build()
                 });
-            
+
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
@@ -201,6 +201,10 @@ namespace AspNetCore.HealthCheck.Tests
             var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var authZService = new Mock<IAuthorizationService>();
+            authZService
+                .Setup(s => s.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
+                .ReturnsAsync(false);
+
             var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, authZService.Object);
             await healthCheckMiddleware.Invoke(contextMock.Object);
 
