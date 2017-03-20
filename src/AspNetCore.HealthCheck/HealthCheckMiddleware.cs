@@ -114,25 +114,25 @@ namespace AspNetCore.HealthCheck
             {
                 policyName = Constants.DefaultPolicy;
             }
-            
-            HealthCheckPolicy policy = _policyProvider.GetPolicy(policyName);
-            if (policy == null)
-            {
-                await _next(context);
-                return;
-            }
 
             if (_options.AuthorizationPolicy != null)
             {
-                var authorizationPolicy = _options.AuthorizationPolicy;
-                var principal = await SecurityHelper.GetUserPrincipal(context, authorizationPolicy);
+                var principal = await SecurityHelper.GetUserPrincipal(context, _options.AuthorizationPolicy);
 
-                if (!await _authorizationService.AuthorizeAsync(principal, context, authorizationPolicy))
+                if (!await _authorizationService.AuthorizeAsync(principal, context, _options.AuthorizationPolicy))
                 {
                     _logger.AuthorizationFailed();
                     await _next(context);
                     return;
                 }
+            }
+
+            HealthCheckPolicy policy = _policyProvider.GetPolicy(policyName);
+            if (policy == null)
+            {
+                _logger.InvalidPolicy(policyName);
+                await _next(context);
+                return;
             }
 
             var response = context.Response;
