@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -86,7 +86,7 @@ namespace AspNetCore.HealthCheck
             {
                 ContractResolver = new DefaultContractResolver
                 {
-                    NamingStrategy = new CamelCaseNamingStrategy(),
+                    NamingStrategy = new SnakeCaseNamingStrategy(true, true),
                 },
                 Converters = new List<JsonConverter>
                 {
@@ -99,7 +99,7 @@ namespace AspNetCore.HealthCheck
             };
             _jsonSerializer = JsonSerializer.Create(jsonSettings);
         }
-        
+
         public async Task Invoke(HttpContext context)
         {
             PathString subpath;
@@ -137,14 +137,20 @@ namespace AspNetCore.HealthCheck
 
             var response = context.Response;
             var healthCheckResponse = await _healthService.CheckHealthAsync(policy);
-            if (healthCheckResponse.HasCriticalErrors)
+
+            if (healthCheckResponse.HasErrors)
             {
-                response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                _logger.HealthCheckFailed(healthCheckResponse.Errors);
+                if (healthCheckResponse.HasCriticalErrors)
+                {
+                    response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                    response.WriteRetryAfterHeader(healthCheckResponse.RetryAfter);
+                }
             }
             else
             {
-                response.StatusCode = StatusCodes.Status200OK;
                 _logger.HealthCheckSucceeded();
+                response.StatusCode = StatusCodes.Status200OK;
             }
 
             if (_options.SendResults && !HttpMethods.IsHead(context.Request.Method))

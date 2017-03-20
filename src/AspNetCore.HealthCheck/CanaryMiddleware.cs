@@ -92,7 +92,7 @@ namespace AspNetCore.HealthCheck
             if (_options.AuthorizationPolicy != null)
             {
                 var principal = await SecurityHelper.GetUserPrincipal(context, _options.AuthorizationPolicy);
-                
+
                 if (!await _authorizationService.AuthorizeAsync(principal, context, _options.AuthorizationPolicy))
                 {
                     _logger.AuthorizationFailed();
@@ -112,21 +112,21 @@ namespace AspNetCore.HealthCheck
             if (serverSwitchContext.ServerDisabled)
             {
                 _logger.ServerDisabled();
-                response.StatusCode = StatusCodes.Status503ServiceUnavailable;                
-                if (serverSwitchContext.RetryAfter.HasValue)
-                {
-                    response.Headers[HeaderNames.RetryAfter] = serverSwitchContext.RetryAfter.Value.ToString(NumberFormatInfo.InvariantInfo);
-                }
+                response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                response.WriteRetryAfterHeader(serverSwitchContext.RetryAfter);
             }
-            else if(_options.EnableHealthCheck)
+            else if (_options.EnableHealthCheck)
             {
                 var healthCheckResponse = await _healthService.CheckHealthAsync(_defaultPolicy);
                 if (healthCheckResponse.HasCriticalErrors)
                 {
+                    _logger.CanaryFailed(healthCheckResponse.Errors);
                     response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                    response.WriteRetryAfterHeader(healthCheckResponse.RetryAfter);
                 }
                 else
                 {
+                    _logger.CanarySucceeded();
                     response.StatusCode = StatusCodes.Status200OK;
                 }
             }

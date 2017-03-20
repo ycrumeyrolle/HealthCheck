@@ -103,7 +103,7 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(new HealthResponse(new List<HealthCheckResult> { new HealthCheckResult { Status = HealthStatus.OK } }));
+                .ReturnsAsync(new HealthResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.OK } }));
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
             var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
@@ -128,6 +128,7 @@ namespace AspNetCore.HealthCheck.Tests
             var contextMock = GetMockContext("/canary");
             RequestDelegate next = _ =>
             {
+                _.Response.StatusCode = 404;
                 return Task.FromResult<object>(null);
             };
 
@@ -142,7 +143,7 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(new HealthResponse(new List<HealthCheckResult> { new HealthCheckResult { Status = HealthStatus.OK } }));
+                .ReturnsAsync(new HealthResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.OK } }));
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
             var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
@@ -161,7 +162,7 @@ namespace AspNetCore.HealthCheck.Tests
 
             serverSwitch.Verify(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()), Times.Never());
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
-            Assert.Equal(0, contextMock.Object.Response.StatusCode);
+            Assert.Equal(404, contextMock.Object.Response.StatusCode);
         }
 
         private Mock<HttpContext> GetMockContext(string path)
