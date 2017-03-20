@@ -1,14 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-
-namespace Microsoft.AspNetCore.Builder
+﻿namespace Microsoft.AspNetCore.Builder
 {
-    public class HealthCheckOptions
+    public class HealthCheckOptions : HealthOptionsBase
     {
-        public PathString Path { get; set; }
-
         public bool SendResults { get; set; } = true;
-
-        public AuthorizationPolicy AuthorizationPolicy { get; set; }
     }
 }
