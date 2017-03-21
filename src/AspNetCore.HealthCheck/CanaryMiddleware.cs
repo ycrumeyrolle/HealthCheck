@@ -52,9 +52,9 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(healthService));
             }
 
-            if (policyProvider == null)
+            if (defaultPolicy == null)
             {
-                throw new ArgumentNullException(nameof(policyProvider));
+                throw new ArgumentNullException(nameof(defaultPolicy));
             }
 
             if (authorizationService == null)
@@ -66,6 +66,7 @@ namespace AspNetCore.HealthCheck
             _options = options.Value;
             _logger = loggerFactory.CreateLogger<CanaryMiddleware>();
             _healthService = healthService;
+            _defaultPolicy = defaultPolicy;
             _serverSwitch = serverSwitch;
             _authorizationService = authorizationService;
 

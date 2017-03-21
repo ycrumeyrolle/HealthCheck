@@ -34,7 +34,7 @@ namespace AspNetCore.HealthCheck
 
             _watcherFactory = watcherFactory;
             _clock = clock;
-            _defaultPolicy = policyProvider.DefaultPolicy;
+            _defaultPolicy = defaultPolicy;
             _resultCache = CreateCache();
         }
 

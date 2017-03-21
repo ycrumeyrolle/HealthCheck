@@ -37,7 +37,6 @@ namespace AspNetCore.HealthCheck.Tests
                 .ReturnsAsync(HealthResponse.Empty);
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
-            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
             serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()));
@@ -69,7 +68,6 @@ namespace AspNetCore.HealthCheck.Tests
                 .ReturnsAsync(HealthResponse.Empty);
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
-            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
             serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()))
@@ -106,7 +104,6 @@ namespace AspNetCore.HealthCheck.Tests
                 .ReturnsAsync(new HealthResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.OK } }));
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
-            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
             serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()))
@@ -215,6 +212,8 @@ namespace AspNetCore.HealthCheck.Tests
                 .Setup(c => c.Request.HasFormContentType)
                 .Returns(true);
             return contextMock;
+
+
         }
 
         private static TestServer CreateServer(HealthCheckOptions options, Func<HttpContext, Func<Task>, Task> handlerBeforeAuth)
@@ -227,7 +226,7 @@ namespace AspNetCore.HealthCheck.Tests
                         app.UseHealthCheck(options);
                     }
                 })
-                .ConfigureServices(services => services.AddHealth(b => { }));
+                .ConfigureServices(services => services.AddHealth());
 
             return new TestServer(builder);
         }

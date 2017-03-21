@@ -119,15 +119,11 @@ namespace AspNetCore.HealthCheck.Sample
             app.UseMiddleware<FakeAuthenticationMiddleware>();
             app.UseHealthCheck(new HealthCheckOptions
             {
-                Path = "/health",
+                Path = "/healthcheck",
                 AuthorizationPolicy = new AuthorizationPolicyBuilder().RequireUserName("bob").Build()
             });
 
-            app.UseCanary(new CanaryOptions
-            {
-                Path = "/canary",
-                PolicyName = "critical"
-            });
+            app.UseCanary("/canary");
         }
     }
 
