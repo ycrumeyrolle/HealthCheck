@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace AspNetCore.HealthCheck
 {
@@ -11,46 +13,39 @@ namespace AspNetCore.HealthCheck
             Results = new HealthCheckResult[0];
         }
 
-        public HealthResponse(List<HealthCheckResult> results)
+        public HealthResponse(IList<HealthCheckResult> results)
         {
-            Results = results.AsReadOnly();
+            Results = new ReadOnlyCollection<HealthCheckResult>(results);
+
+            DateTimeOffset? minTry = null;
+            for (int i = 0; i < Results.Count; i++)
+            {
+                var result = Results[i];
+                if (result.Status != HealthStatus.OK)
+                {
+                    HasErrors = true;
+                    if (result.Critical)
+                    {
+                        HasCriticalErrors = true;
+                    }
+                }
+
+                if (result.NextTry < minTry || !minTry.HasValue)
+                {
+                    minTry = result.NextTry;
+                }
+            }
+
+            RetryAfter = minTry;
         }
 
         public IReadOnlyList<HealthCheckResult> Results { get; }
 
-        public bool HasCriticalErrors
-        {
-            get
-            {
-                for (int i = 0; i < Results.Count; i++)
-                {
-                    var result = Results[i];
-                    if (result.Status != HealthStatus.OK && result.Critical)
-                    {
-                        return true;
-                    }
-                }
+        public bool HasCriticalErrors { get; }
 
-                return false;
-            }
-        }
+        public bool HasErrors { get; }
 
-        public bool HasErrors
-        {
-            get
-            {
-                for (int i = 0; i < Results.Count; i++)
-                {
-                    var result = Results[i];
-                    if (result.Status != HealthStatus.OK)
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
+        public DateTimeOffset? RetryAfter { get; }
 
         public IEnumerable<HealthCheckResult> Errors
         {
