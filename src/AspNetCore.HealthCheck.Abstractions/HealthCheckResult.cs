@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -23,7 +24,10 @@ namespace AspNetCore.HealthCheck
         public bool Critical { get; set; }
 
         [JsonIgnore]
-        public ICollection<string> Tags { get; set; }
+        public DateTimeOffset NextTry { get; set; }
+
+        [JsonIgnore]
+        public Exception Exception { get; set; }
 
         public override string ToString()
         {

@@ -44,6 +44,12 @@ namespace AspNetCore.HealthCheck.Sample
                                 .IsCritical()
                                 .HasTag("authentication");
                         })
+                        .AddEntityFrameworkCoreCheck<FakeDbContext>("myDatabase2", dbContext =>
+                        {
+                            dbContext
+                                .IsCritical()
+                                .HasTag("authentication");
+                        })
                         .AddX509CertificateCheck("OAuth2 token certificate", certificate =>
                         {
                             certificate
@@ -105,8 +111,8 @@ namespace AspNetCore.HealthCheck.Sample
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
             loggerFactory
-                .AddDebug()
-                .AddConsole();
+                .AddDebug(LogLevel.Trace)
+                .AddConsole(LogLevel.Trace);
 
             app.Map("/loopback", a => a.Run(ctx => ctx.Response.WriteAsync("OK")));
 

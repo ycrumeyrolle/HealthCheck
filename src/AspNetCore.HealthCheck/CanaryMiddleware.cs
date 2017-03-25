@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
+using System.Security.Claims;
+using System.Security.Principal;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -17,14 +21,16 @@ namespace AspNetCore.HealthCheck
         private readonly IHealthCheckService _healthService;
         private readonly HealthCheckPolicy _defaultPolicy;
         private readonly IServerSwitch _serverSwitch;
+        private readonly IAuthorizationService _authorizationService;
 
         public CanaryMiddleware(
             RequestDelegate next,
             IOptions<CanaryOptions> options,
             ILoggerFactory loggerFactory,
             IHealthCheckService healthService,
-            HealthCheckPolicy defaultPolicy,
-            IServerSwitch serverSwitch)
+            IHealthCheckPolicyProvider policyProvider,
+            IServerSwitch serverSwitch,
+            IAuthorizationService authorizationService)
         {
             if (next == null)
             {
@@ -51,12 +57,29 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(defaultPolicy));
             }
 
+            if (authorizationService == null)
+            {
+                throw new ArgumentNullException(nameof(authorizationService));
+            }
+
             _next = next;
             _options = options.Value;
             _logger = loggerFactory.CreateLogger<CanaryMiddleware>();
             _healthService = healthService;
             _defaultPolicy = defaultPolicy;
             _serverSwitch = serverSwitch;
+            _authorizationService = authorizationService;
+
+            if (_options.EnableHealthCheck)
+            {
+                var defaultPolicy = policyProvider.GetPolicy(_options.PolicyName);
+                if (defaultPolicy == null)
+                {
+                    throw new ArgumentException($"{nameof(_options.PolicyName)} '{_options.PolicyName}' is not a valid policy.", nameof(_options));
+                }
+
+                _defaultPolicy = defaultPolicy;
+            }
         }
 
         public async Task Invoke(HttpContext context)
@@ -67,33 +90,44 @@ namespace AspNetCore.HealthCheck
                 return;
             }
 
-            var serverSwitchContext = new ServerSwitchContext(context);
-            await _serverSwitch?.CheckServerStateAsync(serverSwitchContext);
+            if (_options.AuthorizationPolicy != null)
+            {
+                var principal = await SecurityHelper.GetUserPrincipal(context, _options.AuthorizationPolicy);
+
+                if (!await _authorizationService.AuthorizeAsync(principal, context, _options.AuthorizationPolicy))
+                {
+                    _logger.AuthorizationFailed();
+                    await _next(context);
+                    return;
+                }
+            }
+
             var response = context.Response;
 
             // Canary response must not be cached
             response.Headers[HeaderNames.CacheControl] = "no-cache";
             response.Headers[HeaderNames.Pragma] = "no-cache";
             response.Headers[HeaderNames.Expires] = "-1";
+            var serverSwitchContext = new ServerSwitchContext(context);
+            await _serverSwitch?.CheckServerStateAsync(serverSwitchContext);
             if (serverSwitchContext.ServerDisabled)
             {
                 _logger.ServerDisabled();
                 response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-                
-                if (serverSwitchContext.RetryAfter.HasValue)
-                {
-                    response.Headers[HeaderNames.RetryAfter] = serverSwitchContext.RetryAfter.Value.ToString(NumberFormatInfo.InvariantInfo);
-                }
+                response.WriteRetryAfterHeader(serverSwitchContext.RetryAfter);
             }
-            else
+            else if (_options.EnableHealthCheck)
             {
                 var healthCheckResponse = await _healthService.CheckHealthAsync(_defaultPolicy);
                 if (healthCheckResponse.HasCriticalErrors)
                 {
+                    _logger.CanaryFailed(healthCheckResponse.Errors);
                     response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                    response.WriteRetryAfterHeader(healthCheckResponse.RetryAfter);
                 }
                 else
                 {
+                    _logger.CanarySucceeded();
                     response.StatusCode = StatusCodes.Status200OK;
                 }
             }

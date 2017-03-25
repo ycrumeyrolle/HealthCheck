@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -85,7 +85,7 @@ namespace AspNetCore.HealthCheck
             {
                 ContractResolver = new DefaultContractResolver
                 {
-                    NamingStrategy = new CamelCaseNamingStrategy(),
+                    NamingStrategy = new SnakeCaseNamingStrategy(true, true),
                 },
                 Converters = new List<JsonConverter>
                 {
@@ -99,23 +99,6 @@ namespace AspNetCore.HealthCheck
             _jsonSerializer = JsonSerializer.Create(jsonSettings);
         }
 
-        private Dictionary<PathString, HealthCheckPolicy> CreatePolicies(HealthCheckPolicy policy)
-        {
-            var policies = policy.WatchSettings
-                .SelectMany(s => s.Value.Tags, (s, t) => new { Tag = t, Settings = s })
-                .GroupBy(item => item.Tag)
-                .ToDictionary(
-                    group => new PathString("/" + group.Key),
-                    group => group.Aggregate(new SettingsCollection(), (settings, item) =>
-                    {
-                        settings.Add(item.Settings);
-                        return settings;
-                    },
-                    settings => new HealthCheckPolicy(settings)));
-            policies.Add(PathString.Empty, policy);
-            return policies;
-        }
-
         public async Task Invoke(HttpContext context)
         {
             PathString subpath;
@@ -125,40 +108,17 @@ namespace AspNetCore.HealthCheck
                 return;
             }
 
-            var response = context.Response;
-            HealthCheckPolicy policy;
-            if (!_policies.TryGetValue(subpath.ToUriComponent().TrimEnd('/'), out policy))
+            var policyName = subpath.ToUriComponent().Trim('/');
+            if (policyName.Length == 0)
             {
-                await _next(context);
-                return;
+                policyName = Constants.DefaultPolicy;
             }
 
             if (_options.AuthorizationPolicy != null)
             {
-                // Build a ClaimsPrincipal with the Policy's required authentication types
-                if (_options.AuthorizationPolicy.AuthenticationSchemes != null && _options.AuthorizationPolicy.AuthenticationSchemes.Any())
-                {
-                    ClaimsPrincipal newPrincipal = null;
-                    foreach (var scheme in _options.AuthorizationPolicy.AuthenticationSchemes)
-                    {
-                        var result = await context.Authentication.AuthenticateAsync(scheme);
-                        if (result != null)
-                        {
-                            newPrincipal = SecurityHelper.MergeUserPrincipal(newPrincipal, result);
-                        }
-                    }
+                var principal = await SecurityHelper.GetUserPrincipal(context, _options.AuthorizationPolicy);
 
-                    // If all schemes failed authentication, provide a default identity anyways
-                    if (newPrincipal == null)
-                    {
-                        newPrincipal = new ClaimsPrincipal(new ClaimsIdentity());
-                    }
-
-                    context.User = newPrincipal;
-                }
-
-                // Note: Default Anonymous User is new ClaimsPrincipal(new ClaimsIdentity())
-                if (!await _authorizationService.AuthorizeAsync(context.User, context, _options.AuthorizationPolicy))
+                if (!await _authorizationService.AuthorizeAsync(principal, context, _options.AuthorizationPolicy))
                 {
                     _logger.AuthorizationFailed();
                     await _next(context);
@@ -166,15 +126,30 @@ namespace AspNetCore.HealthCheck
                 }
             }
 
-            var healthCheckResponse = await _healthService.CheckHealthAsync(policy);
-            if (healthCheckResponse.HasCriticalErrors)
+            HealthCheckPolicy policy = _policyProvider.GetPolicy(policyName);
+            if (policy == null)
             {
-                response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                _logger.InvalidPolicy(policyName);
+                await _next(context);
+                return;
+            }
+
+            var response = context.Response;
+            var healthCheckResponse = await _healthService.CheckHealthAsync(policy);
+
+            if (healthCheckResponse.HasErrors)
+            {
+                _logger.HealthCheckFailed(healthCheckResponse.Errors);
+                if (healthCheckResponse.HasCriticalErrors)
+                {
+                    response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                    response.WriteRetryAfterHeader(healthCheckResponse.RetryAfter);
+                }
             }
             else
             {
-                response.StatusCode = StatusCodes.Status200OK;
                 _logger.HealthCheckSucceeded();
+                response.StatusCode = StatusCodes.Status200OK;
             }
 
             if (_options.SendResults && !HttpMethods.IsHead(context.Request.Method))

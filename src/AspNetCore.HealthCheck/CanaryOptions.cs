@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AspNetCore.HealthCheck;
 
 namespace Microsoft.AspNetCore.Builder
 {
-    public class CanaryOptions
+    public class CanaryOptions : HealthOptionsBase
     {
-        public PathString Path { get; set; }
+        public string PolicyName { get; set; } = Constants.DefaultPolicy;
+
+        public bool EnableHealthCheck { get; set; } = true;
     }
 }

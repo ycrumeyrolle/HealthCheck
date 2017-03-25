@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -40,10 +41,12 @@ namespace AspNetCore.HealthCheck.Tests
             var serverSwitch = new Mock<IServerSwitch>();
             serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()));
 
-            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, serverSwitch.Object);
+            var authZService = new Mock<IAuthorizationService>();
+
+            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, serverSwitch.Object, authZService.Object);
             await canaryMiddleware.Invoke(contextMock.Object);
 
-            healthService.Verify(s  => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
+            healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
         }
 
         [Fact]
@@ -70,8 +73,10 @@ namespace AspNetCore.HealthCheck.Tests
             serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()))
                 .Callback<ServerSwitchContext>(c => c.Disable())
                 .Returns(Task.FromResult(0));
-            
-            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, serverSwitch.Object);
+
+            var authZService = new Mock<IAuthorizationService>();
+
+            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, serverSwitch.Object, authZService.Object);
             await canaryMiddleware.Invoke(contextMock.Object);
 
 
@@ -96,7 +101,7 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(new HealthResponse(new List<HealthCheckResult> { new HealthCheckResult { Status = HealthStatus.OK } }));
+                .ReturnsAsync(new HealthResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.OK } }));
 
             var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
 
@@ -104,12 +109,57 @@ namespace AspNetCore.HealthCheck.Tests
             serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()))
                 .Returns(Task.FromResult(0));
 
-            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, defaultPolicy, serverSwitch.Object);
+            var authZService = new Mock<IAuthorizationService>();
+
+            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, serverSwitch.Object, authZService.Object);
             await canaryMiddleware.Invoke(contextMock.Object);
 
             serverSwitch.Verify(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()), Times.Once());
             healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Once());
             Assert.Equal(StatusCodes.Status200OK, contextMock.Object.Response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Invoke_AuthZPolicyFailed_DelegateToNextMiddleware()
+        {
+            var contextMock = GetMockContext("/canary");
+            RequestDelegate next = _ =>
+            {
+                _.Response.StatusCode = 404;
+                return Task.FromResult<object>(null);
+            };
+
+            var options = new Mock<IOptions<CanaryOptions>>();
+            options.SetupGet(o => o.Value)
+                .Returns(new CanaryOptions()
+                {
+                    Path = "/canary",
+                    AuthorizationPolicy = new AuthorizationPolicyBuilder().RequireClaim("invalid").Build()
+                });
+
+            var loggerFactory = new LoggerFactory();
+            var healthService = new Mock<IHealthCheckService>();
+            healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
+                .ReturnsAsync(new HealthResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.OK } }));
+
+            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
+
+            var serverSwitch = new Mock<IServerSwitch>();
+            serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()))
+                .Returns(Task.FromResult(0));
+
+            var authZService = new Mock<IAuthorizationService>();
+            authZService
+                .Setup(s => s.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
+                .ReturnsAsync(false);
+
+            var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, serverSwitch.Object, authZService.Object);
+            await canaryMiddleware.Invoke(contextMock.Object);
+
+            serverSwitch.Verify(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()), Times.Never());
+            healthService.Verify(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()), Times.Never());
+            Assert.Equal(404, contextMock.Object.Response.StatusCode);
         }
 
         private Mock<HttpContext> GetMockContext(string path)
@@ -174,7 +224,7 @@ namespace AspNetCore.HealthCheck.Tests
                     if (options != null)
                     {
                         app.UseHealthCheck(options);
-                    }                    
+                    }
                 })
                 .ConfigureServices(services => services.AddHealth());
 

@@ -12,11 +12,10 @@ namespace AspNetCore.HealthCheck
     {
         private readonly ISystemClock _clock;
         private readonly IHealthWatcherFactory _watcherFactory;
-        private readonly ILogger _logger;
         private readonly Dictionary<string, WatchResultCache> _resultCache;
         private readonly HealthCheckPolicy _defaultPolicy;
 
-        public DefaultHealthCheckService(ISystemClock clock, HealthCheckPolicy defaultPolicy, IHealthWatcherFactory watcherFactory, ILoggerFactory loggerFactory)
+        public DefaultHealthCheckService(ISystemClock clock, IHealthCheckPolicyProvider policyProvider, IHealthWatcherFactory watcherFactory)
         {
             if (watcherFactory == null)
             {
@@ -28,16 +27,15 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(clock));
             }
 
-            if (defaultPolicy == null)
+            if (policyProvider == null)
             {
-                throw new ArgumentNullException(nameof(defaultPolicy));
+                throw new ArgumentNullException(nameof(policyProvider));
             }
 
             _watcherFactory = watcherFactory;
             _clock = clock;
             _defaultPolicy = defaultPolicy;
             _resultCache = CreateCache();
-            _logger = loggerFactory.CreateLogger<DefaultHealthCheckService>();
         }
 
         private Dictionary<string, WatchResultCache> CreateCache()
@@ -48,9 +46,8 @@ namespace AspNetCore.HealthCheck
             {
                 var watcherType = kvpSettings.Key;
                 var settings = kvpSettings.Value;
-                IHealthWatcher watcher = null;
-                watcher = _watcherFactory.Create(watcherType);
-                results.Add(settings.Name, new WatchResultCache(watcher, settings));
+                IHealthWatcher watcher = _watcherFactory.Create(watcherType);
+                results.Add(settings.Name, new WatchResultCache(watcher));
             }
 
             return results;
@@ -66,13 +63,7 @@ namespace AspNetCore.HealthCheck
             }
 
             var results = await Task.WhenAll(taskResults);
-            var healthResults = new List<HealthCheckResult>();
-            for (int i = 0; i < results.Length; i++)
-            {
-                healthResults.Add(results[i]);
-            }
-
-            return new HealthResponse(healthResults);
+            return new HealthResponse(results);
         }
 
         private async Task<HealthCheckResult> CheckHealthAsync(HealthCheckPolicy policy, IWatchSettings settings)
@@ -98,38 +89,31 @@ namespace AspNetCore.HealthCheck
                         result = new HealthCheckResult
                         {
                             Name = settings.Name,
-                            Tags = settings.Tags,
                             Elapsed = healthContext.ElapsedMilliseconds,
                             Message = healthContext.Message,
                             Status = healthContext.HasSucceeded ? HealthStatus.OK : healthContext.HasWarned ? HealthStatus.Warning : HealthStatus.KO,
                             Issued = utcNow.ToUnixTimeSeconds(),
+                            NextTry = utcNow.AddSeconds(settings.Frequency),
                             Critical = settings.Critical,
                             Properties = healthContext.Properties?.ToDictionary(kvp => kvp.Key, kvp => JToken.FromObject(kvp.Value))
                         };
-
-                        if (!healthContext.HasSucceeded)
-                        {
-                            _logger.HealthCheckFailed(result);
-
-                            // Clear the properties object in order to avoid information leak.
-                            result.Properties = null;
-                        }
-
-                        watchCache.Update(_clock.UtcNow, result);
+                        
+                        watchCache.Result = result;
                     }
                     catch (Exception e)
                     {
                         result = new HealthCheckResult
                         {
                             Name = settings.Name,
-                            Tags = settings.Tags,
                             Elapsed = healthContext.ElapsedMilliseconds,
                             Message = "An error occured. See logs for more details.",
                             Status = HealthStatus.KO,
                             Issued = utcNow.ToUnixTimeSeconds(),
+                            NextTry = utcNow.AddSeconds(settings.Frequency),
                             Critical = settings.Critical,
+                            Exception = e
                         };
-                        _logger.HealthCheckError(result, e);
+                        watchCache.Result = result;
                     }
                 }
             }
@@ -139,29 +123,18 @@ namespace AspNetCore.HealthCheck
 
         private class WatchResultCache
         {
-            public WatchResultCache(IHealthWatcher watcher, IWatchSettings settings)
+            public WatchResultCache(IHealthWatcher watcher)
             {
                 Watcher = watcher;
-                Settings = settings;
             }
 
             public IHealthWatcher Watcher { get; }
 
-            public IWatchSettings Settings { get; }
-
-            public HealthCheckResult Result { get; private set; }
-
-            public DateTimeOffset Latest { get; private set; }
-
-            public void Update(DateTimeOffset time, HealthCheckResult result)
-            {
-                Latest = time;
-                Result = result;
-            }
+            public HealthCheckResult Result { get; set; }
 
             public bool ShouldCheck(DateTimeOffset time)
             {
-                return Latest.AddSeconds(Settings.Frequency) < time || Result == null;
+                return Result == null || Result.NextTry < time;
             }
         }
     }
