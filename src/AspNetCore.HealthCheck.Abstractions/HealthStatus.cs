@@ -3,8 +3,8 @@ namespace AspNetCore.HealthCheck
 {
     public enum HealthStatus
     {
-        OK,
-        KO, 
+        Healthy,
+        Unhealthy, 
         Warning
     }
 }

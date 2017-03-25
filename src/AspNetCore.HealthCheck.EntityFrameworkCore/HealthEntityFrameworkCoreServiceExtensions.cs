@@ -8,7 +8,7 @@ namespace AspNetCore.HealthCheck
 {
     public static class HealthEntityFrameworkCoreServiceExtensions
     {
-        public static HealthCheckBuilder AddEntityFrameworkCoreCheck<TDbContext>(this HealthCheckBuilder builder, EntityFrameworkCoreWatchOptions options) where TDbContext: DbContext
+        public static HealthCheckBuilder AddEntityFrameworkCoreCheck<TDbContext>(this HealthCheckBuilder builder, EntityFrameworkCoreCheckOptions options) where TDbContext: DbContext
         {
             if (builder == null)
             {
@@ -20,11 +20,11 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(options));
             }
 
-            var settings = new EntityFrameworkCoreWatchSettings<TDbContext>(options.Name, options.Critical, options.Frequency, options.Tags);
+            var settings = new EntityFrameworkCoreCheckSettings<TDbContext>(options.Name, options.Critical, options.Frequency, options.Tags);
             return builder.AddEntityFrameworkCoreCheck<TDbContext>(settings);
         }
 
-        public static HealthCheckBuilder AddEntityFrameworkCoreCheck<TDbContext>(this HealthCheckBuilder builder, string name, Action<EntityFrameworkCoreHealthCheckBuilder<TDbContext>> configureAction) where TDbContext : DbContext
+        public static HealthCheckBuilder AddEntityFrameworkCoreCheck<TDbContext>(this HealthCheckBuilder builder, string name, Action<EntityFrameworkCoreCheckSettingsBuilder<TDbContext>> configureAction) where TDbContext : DbContext
         {
             if (builder == null)
             {
@@ -41,7 +41,7 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(configureAction));
             }
 
-            var settingsBuilder = new EntityFrameworkCoreHealthCheckBuilder<TDbContext>(name);
+            var settingsBuilder = new EntityFrameworkCoreCheckSettingsBuilder<TDbContext>(name);
             configureAction(settingsBuilder);
             var settings = settingsBuilder.Build();
             return builder.AddEntityFrameworkCoreCheck(settings);
@@ -59,16 +59,16 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(configuration));
             }
 
-            var options = new EntityFrameworkCoreWatchOptions();
+            var options = new EntityFrameworkCoreCheckOptions();
             configuration.Bind(options);
 
             return builder.AddEntityFrameworkCoreCheck<TDbContext>(options);
         }
 
-        private static HealthCheckBuilder AddEntityFrameworkCoreCheck<TDbContext>(this HealthCheckBuilder builder, EntityFrameworkCoreWatchSettings<TDbContext> settings) where TDbContext : DbContext
+        private static HealthCheckBuilder AddEntityFrameworkCoreCheck<TDbContext>(this HealthCheckBuilder builder, EntityFrameworkCoreCheckSettings<TDbContext> settings) where TDbContext : DbContext
         {
-            builder.Services.TryAddTransient(typeof(EntityFrameworkCoreWatcher<TDbContext>));
-            return builder.Add<EntityFrameworkCoreWatcher<TDbContext>>(settings);
+            builder.Services.TryAddTransient(typeof(EntityFrameworkCoreCheck<TDbContext>));
+            return builder.Add<EntityFrameworkCoreCheck<TDbContext>>(settings);
         }
     }
 }

@@ -34,9 +34,10 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(HealthResponse.Empty);
+                .ReturnsAsync(HealthCheckResponse.Empty);
 
-            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var defaultPolicy = new HealthCheckPolicy(new HealthCheckSettingsCollection());
+            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
             serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()));
@@ -65,9 +66,10 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(HealthResponse.Empty);
+                .ReturnsAsync(HealthCheckResponse.Empty);
 
-            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var defaultPolicy = new HealthCheckPolicy(new HealthCheckSettingsCollection());
+            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
             serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()))
@@ -101,9 +103,10 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(new HealthResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.OK } }));
+                .ReturnsAsync(new HealthCheckResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.Healthy } }));
 
-            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var defaultPolicy = new HealthCheckPolicy(new HealthCheckSettingsCollection());
+            var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
             serverSwitch.Setup(s => s.CheckServerStateAsync(It.IsAny<ServerSwitchContext>()))
@@ -140,9 +143,9 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(new HealthResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.OK } }));
+                .ReturnsAsync(new HealthCheckResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.Healthy } }));
 
-            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var defaultPolicy = new HealthCheckPolicy(new HealthCheckSettingsCollection());
             var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
@@ -212,8 +215,6 @@ namespace AspNetCore.HealthCheck.Tests
                 .Setup(c => c.Request.HasFormContentType)
                 .Returns(true);
             return contextMock;
-
-
         }
 
         private static TestServer CreateServer(HealthCheckOptions options, Func<HttpContext, Func<Task>, Task> handlerBeforeAuth)
@@ -226,7 +227,7 @@ namespace AspNetCore.HealthCheck.Tests
                         app.UseHealthCheck(options);
                     }
                 })
-                .ConfigureServices(services => services.AddHealth());
+                .ConfigureServices(services => services.AddHealth(b => { }));
 
             return new TestServer(builder);
         }

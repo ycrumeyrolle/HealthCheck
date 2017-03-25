@@ -21,24 +21,25 @@ namespace AspNetCore.HealthCheck
     {
         private const string ApplicationJson = "application/json";
 
-        private readonly ILogger _logger;
         private readonly RequestDelegate _next;
+        private readonly ILogger _logger;
         private readonly HealthCheckOptions _options;
+        private readonly IHealthCheckService _healthService;
+        private readonly IHealthCheckPolicyProvider _policyProvider;
+        private readonly IAuthorizationService _authorizationService;
+
+        private readonly JsonSerializer _jsonSerializer;
         private readonly JsonSerializer serializer = new JsonSerializer();
         private readonly ArrayPool<char> _charPool;
         private readonly ArrayPool<byte> _bytePool;
         private readonly JsonArrayPool<char> _jsonCharPool;
-        private readonly IHealthCheckService _healthService;
-        private readonly JsonSerializer _jsonSerializer;
-        private readonly Dictionary<PathString, HealthCheckPolicy> _policies;
-        private readonly IAuthorizationService _authorizationService;
 
         public HealthCheckMiddleware(
             RequestDelegate next,
             IOptions<HealthCheckOptions> options,
             ILoggerFactory loggerFactory,
             IHealthCheckService healthService,
-            HealthCheckPolicy defaultPolicy,
+            IHealthCheckPolicyProvider policyProvider,
             IAuthorizationService authorizationService)
         {
             if (next == null)
@@ -61,9 +62,9 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(healthService));
             }
 
-            if (defaultPolicy == null)
+            if (policyProvider == null)
             {
-                throw new ArgumentNullException(nameof(defaultPolicy));
+                throw new ArgumentNullException(nameof(policyProvider));
             }
 
             if (authorizationService == null)
@@ -75,7 +76,7 @@ namespace AspNetCore.HealthCheck
             _options = options.Value;
             _logger = loggerFactory.CreateLogger<HealthCheckMiddleware>();
             _healthService = healthService;
-            _policies = CreatePolicies(defaultPolicy);
+            _policyProvider = policyProvider;
             _authorizationService = authorizationService;
 
             _charPool = ArrayPool<char>.Shared;

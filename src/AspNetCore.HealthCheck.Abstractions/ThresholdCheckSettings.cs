@@ -1,0 +1,22 @@
+﻿using System.Collections.Generic;
+
+namespace AspNetCore.HealthCheck
+{
+    public abstract class ThresholdCheckSettings : HealthCheckSettings
+    {
+        public ThresholdCheckSettings(string name, bool critical, int frequency, IEnumerable<string> tags, long errorThreshold, long warningThreshold)
+            : base(name, critical, frequency, tags)
+        {
+            ErrorThreshold = errorThreshold;
+            WarningThreshold = warningThreshold;
+        }
+
+        public long ErrorThreshold { get; set; }
+
+        public long WarningThreshold { get; set; }
+
+        public abstract bool HasReachedWarningThreshold(long value);
+
+        public abstract bool HasReachedErrorThreshold(long value);
+    }
+}

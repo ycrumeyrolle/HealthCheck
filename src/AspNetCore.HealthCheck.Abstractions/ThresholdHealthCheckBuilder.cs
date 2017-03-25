@@ -1,6 +1,6 @@
 ﻿namespace AspNetCore.HealthCheck
 {
-    public abstract class ThresholdHealthCheckBuilder<TSettings> : SettingsHealthCheckBuilder<TSettings> where TSettings : ThresholdWatchSettings
+    public abstract class ThresholdHealthCheckBuilder<TSettings> : HealthCheckSettingsBuilder<TSettings> where TSettings : ThresholdCheckSettings
     {
         private long _errorThreshold;
         private long _warningThreshold;
