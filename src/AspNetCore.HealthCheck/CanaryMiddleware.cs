@@ -62,6 +62,11 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentNullException(nameof(authorizationService));
             }
 
+            if (authorizationService == null)
+            {
+                throw new ArgumentNullException(nameof(authorizationService));
+            }
+
             _next = next;
             _options = options.Value;
             _logger = loggerFactory.CreateLogger<CanaryMiddleware>();
