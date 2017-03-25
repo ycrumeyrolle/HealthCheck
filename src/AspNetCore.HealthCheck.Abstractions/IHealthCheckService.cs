@@ -4,6 +4,6 @@ namespace AspNetCore.HealthCheck
 {
     public interface IHealthCheckService
     {
-        Task<HealthResponse> CheckHealthAsync(HealthCheckPolicy policy);
+        Task<HealthCheckResponse> CheckHealthAsync(HealthCheckPolicy policy);
     }
 }

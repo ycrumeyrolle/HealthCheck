@@ -4,16 +4,16 @@ namespace AspNetCore.HealthCheck
 {
     public class HealthCheckPolicy
     {
-        public HealthCheckPolicy(SettingsCollection watchSettings)
+        public HealthCheckPolicy(HealthCheckSettingsCollection checkSettings)
         {
-            if (watchSettings == null)
+            if (checkSettings == null)
             {
-                throw new ArgumentNullException(nameof(watchSettings));
+                throw new ArgumentNullException(nameof(checkSettings));
             }
 
-            WatchSettings = watchSettings;
+            CheckSettings = checkSettings;
         }
 
-        public SettingsCollection WatchSettings { get; }
+        public HealthCheckSettingsCollection CheckSettings { get; }
     }
 }
