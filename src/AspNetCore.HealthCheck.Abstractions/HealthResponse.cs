@@ -21,7 +21,7 @@ namespace AspNetCore.HealthCheck
             for (int i = 0; i < Results.Count; i++)
             {
                 var result = Results[i];
-                if (result.Status != HealthStatus.OK)
+                if (result.Status != HealthStatus.Healthy)
                 {
                     HasErrors = true;
                     if (result.Critical)
@@ -54,7 +54,7 @@ namespace AspNetCore.HealthCheck
                 for (int i = 0; i < Results.Count; i++)
                 {
                     var result = Results[i];
-                    if (result.Status != HealthStatus.OK && result.Critical)
+                    if (result.Status != HealthStatus.Healthy && result.Critical)
                     {
                         yield return result;
                     }

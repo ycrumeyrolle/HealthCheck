@@ -8,7 +8,7 @@ namespace AspNetCore.HealthCheck
 {
     public static class HealthEntityFrameworkCoreServiceExtensions
     {
-        public static HealthCheckBuilder AddEntityFrameworkCoreCheck<TDbContext>(this HealthCheckBuilder builder, EntityFrameworkCoreCheckOptions options) where TDbContext: DbContext
+        public static HealthCheckBuilder AddEntityFrameworkCoreCheck<TDbContext>(this HealthCheckBuilder builder, EntityFrameworkCoreCheckOptions options) where TDbContext : DbContext
         {
             if (builder == null)
             {
