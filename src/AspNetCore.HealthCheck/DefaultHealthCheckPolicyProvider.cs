@@ -44,12 +44,12 @@ namespace AspNetCore.HealthCheck
 
         private Dictionary<string, HealthCheckPolicy> CreatePolicies(HealthCheckPolicy policy)
         {
-            var policies = policy.WatchSettings
+            var policies = policy.CheckSettings
                 .SelectMany(s => s.Value.Tags, (s, t) => new { Tag = t, Settings = s })
                 .GroupBy(item => item.Tag)
                 .ToDictionary(
                     group => group.Key,
-                    group => group.Aggregate(new SettingsCollection(), (settings, item) =>
+                    group => group.Aggregate(new HealthCheckSettingsCollection(), (settings, item) =>
                     {
                         settings.Add(item.Settings);
                         return settings;

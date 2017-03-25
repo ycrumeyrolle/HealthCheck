@@ -23,7 +23,7 @@ namespace AspNetCore.HealthCheck
             Services = services;
         }
 
-        public HealthCheckBuilder Add<TWatcher>(IWatchSettings settings) where TWatcher : class, IHealthWatcher
+        public HealthCheckBuilder Add<TCheck>(IHealthCheckSettings settings) where TCheck : class, IHealthCheck
         {
             if (settings == null)
             {
@@ -35,8 +35,8 @@ namespace AspNetCore.HealthCheck
                 throw new ArgumentException($"Property {nameof(settings.Name)} cannot be null or empty.", nameof(settings));
             }
             
-            Services.TryAddTransient<TWatcher>();
-            Settings.Add(typeof(TWatcher), settings);
+            Services.TryAddTransient<TCheck>();
+            Settings.Add(typeof(TCheck), settings);
             return this;
         }
 
@@ -57,7 +57,7 @@ namespace AspNetCore.HealthCheck
         /// </summary>
         public IServiceCollection Services { get; }
 
-        public SettingsCollection Settings { get; } = new SettingsCollection();
+        public HealthCheckSettingsCollection Settings { get; } = new HealthCheckSettingsCollection();
 
         public HealthCheckPolicy Build()
         {

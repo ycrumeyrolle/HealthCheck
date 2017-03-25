@@ -34,9 +34,9 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(HealthResponse.Empty);
+                .ReturnsAsync(HealthCheckResponse.Empty);
 
-            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var defaultPolicy = new HealthCheckPolicy(new HealthCheckSettingsCollection());
             var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var authZService = new Mock<IAuthorizationService>();
@@ -63,7 +63,7 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(HealthResponse.Empty);
+                .ReturnsAsync(HealthCheckResponse.Empty);
 
             var defaultPolicy = new HealthCheckBuilder(new ServiceCollection())
                 .AddCheck("test", ctx =>
@@ -97,7 +97,7 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(HealthResponse.Empty);
+                .ReturnsAsync(HealthCheckResponse.Empty);
 
             var defaultPolicy = new HealthCheckBuilder(new ServiceCollection())
                 .AddCheck("test", ctx =>
@@ -130,9 +130,9 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(new HealthResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.OK } }));
+                .ReturnsAsync(new HealthCheckResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.Healthy } }));
 
-            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var defaultPolicy = new HealthCheckPolicy(new HealthCheckSettingsCollection());
             var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var authZService = new Mock<IAuthorizationService>();
@@ -159,9 +159,9 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(new HealthResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.KO, Critical = true } }));
+                .ReturnsAsync(new HealthCheckResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.Unhealthy, Critical = true } }));
 
-            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var defaultPolicy = new HealthCheckPolicy(new HealthCheckSettingsCollection());
             var policyProvider = new Mock<IHealthCheckPolicyProvider>();
             policyProvider
                 .Setup(p => p.GetPolicy(It.IsAny<string>()))
@@ -196,9 +196,9 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(new HealthResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.OK, } }));
+                .ReturnsAsync(new HealthCheckResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.Healthy, } }));
 
-            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var defaultPolicy = new HealthCheckPolicy(new HealthCheckSettingsCollection());
             var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var authZService = new Mock<IAuthorizationService>();

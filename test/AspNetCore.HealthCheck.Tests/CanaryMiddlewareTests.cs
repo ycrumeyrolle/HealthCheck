@@ -34,9 +34,9 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(HealthResponse.Empty);
+                .ReturnsAsync(HealthCheckResponse.Empty);
 
-            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var defaultPolicy = new HealthCheckPolicy(new HealthCheckSettingsCollection());
             var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
@@ -66,9 +66,9 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(HealthResponse.Empty);
+                .ReturnsAsync(HealthCheckResponse.Empty);
 
-            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var defaultPolicy = new HealthCheckPolicy(new HealthCheckSettingsCollection());
             var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
@@ -103,9 +103,9 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(new HealthResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.OK } }));
+                .ReturnsAsync(new HealthCheckResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.Healthy } }));
 
-            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var defaultPolicy = new HealthCheckPolicy(new HealthCheckSettingsCollection());
             var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
@@ -143,9 +143,9 @@ namespace AspNetCore.HealthCheck.Tests
             var loggerFactory = new LoggerFactory();
             var healthService = new Mock<IHealthCheckService>();
             healthService.Setup(s => s.CheckHealthAsync(It.IsAny<HealthCheckPolicy>()))
-                .ReturnsAsync(new HealthResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.OK } }));
+                .ReturnsAsync(new HealthCheckResponse(new HealthCheckResult[] { new HealthCheckResult { Status = HealthStatus.Healthy } }));
 
-            var defaultPolicy = new HealthCheckPolicy(new SettingsCollection());
+            var defaultPolicy = new HealthCheckPolicy(new HealthCheckSettingsCollection());
             var policyProvider = new DefaultHealthCheckPolicyProvider(defaultPolicy);
 
             var serverSwitch = new Mock<IServerSwitch>();
