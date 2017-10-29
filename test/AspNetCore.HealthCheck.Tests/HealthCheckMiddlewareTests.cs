@@ -204,7 +204,7 @@ namespace AspNetCore.HealthCheck.Tests
             var authZService = new Mock<IAuthorizationService>();
             authZService
                 .Setup(s => s.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(false);
+                .ReturnsAsync(AuthorizationResult.Failed());
 
             var healthCheckMiddleware = new HealthCheckMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, authZService.Object);
             await healthCheckMiddleware.Invoke(contextMock.Object);

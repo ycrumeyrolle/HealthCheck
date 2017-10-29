@@ -119,7 +119,8 @@ namespace AspNetCore.HealthCheck
             {
                 var principal = await SecurityHelper.GetUserPrincipal(context, _options.AuthorizationPolicy);
 
-                if (!await _authorizationService.AuthorizeAsync(principal, context, _options.AuthorizationPolicy))
+                var authorizeResult = await _authorizationService.AuthorizeAsync(principal, context, _options.AuthorizationPolicy);
+                if (!authorizeResult.Succeeded)
                 {
                     _logger.AuthorizationFailed();
                     await _next(context);

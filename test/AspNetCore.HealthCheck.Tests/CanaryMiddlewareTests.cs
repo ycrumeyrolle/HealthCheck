@@ -155,7 +155,7 @@ namespace AspNetCore.HealthCheck.Tests
             var authZService = new Mock<IAuthorizationService>();
             authZService
                 .Setup(s => s.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(false);
+                .ReturnsAsync(AuthorizationResult.Failed());
 
             var canaryMiddleware = new CanaryMiddleware(next, options.Object, loggerFactory, healthService.Object, policyProvider, serverSwitch.Object, authZService.Object);
             await canaryMiddleware.Invoke(contextMock.Object);
