@@ -11,7 +11,7 @@ namespace AspNetCore.HealthCheck.Smtp
     {
         private const string SmtpRequestedActionOkResponseCode = "250";
 
-#if NETSTANDARD1_3        
+#if NETSTANDARD2_0        
         public override async Task CheckHealthAsync(HealthCheckContext context, SmtpCheckSettings settings)
         {
             using (var tcpClient = new TcpClient())
@@ -28,9 +28,7 @@ namespace AspNetCore.HealthCheck.Smtp
                 return Task.FromResult<Stream>(networkStream);
             }
 
-            // Ssl Stream is not implemented in netstandard1.3
-            // it will come in 2.0
-            throw new NotSupportedException();
+            return Task.FromResult<Stream>(new SslStream(networkStream));
         }
 
         public static async Task ForceTimeout(Task task, int millisecondsTimeout)
@@ -84,7 +82,7 @@ namespace AspNetCore.HealthCheck.Smtp
         {
             using (NetworkStream networkStream = tcpClient.GetStream())
             {
-                Stream stream = await WrapStream(settings, networkStream);
+                using (Stream stream = await WrapStream(settings, networkStream))
                 using (var reader = new StreamReader(stream))
                 {
                     using (var writer = new StreamWriter(stream))

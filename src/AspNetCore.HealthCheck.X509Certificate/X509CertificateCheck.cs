@@ -20,8 +20,8 @@ namespace AspNetCore.HealthCheck
             var certificate = _certificateResolver.ResolveCertificate(settings.StoreName, settings.StoreLocation, settings.Thumbprint);
             if (certificate == null)
             {
-#if NETSTANDARD1_3
-                // In NetStandard 1.3, we are no able to determinate if the certificate is missing or invalid.
+#if NETSTANDARD2_0
+                // In NetStandard 2.0, we are no able to determinate if the certificate is missing or invalid.
                 context.Fail("Missing or invalid certificate.");
 #else
                 context.Fail("Missing certificate.");
@@ -29,7 +29,7 @@ namespace AspNetCore.HealthCheck
                 return TaskCache.CompletedTask;
             }
 
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
             if (!certificate.Verify())
             {
                 context.Fail("Invalid certificate.");

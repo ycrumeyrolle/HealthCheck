@@ -1,4 +1,4 @@
-﻿#if !NETSTANDARD1_3
+﻿#if !NETSTANDARD2_0
 using Oracle.ManagedDataAccess.Client;
 #endif
 using System.Threading.Tasks;
@@ -9,7 +9,7 @@ namespace AspNetCore.HealthCheck.Oracle
     {
         private const string SelectOneSqlCommandText = "SELECT 1 FROM DUAL";
 
-#if !NETSTANDARD1_3
+#if !NETSTANDARD2_0
         public override async Task CheckHealthAsync(HealthCheckContext context, OracleCheckSettings settings)
         {
             using (OracleConnection dbConnection = new OracleConnection(settings.ConnectionString))
@@ -25,7 +25,7 @@ namespace AspNetCore.HealthCheck.Oracle
         }
 #endif
 
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
         public override Task CheckHealthAsync(HealthCheckContext context, OracleCheckSettings settings)
         {
             // OracleManaged not yet compatible with netcore 

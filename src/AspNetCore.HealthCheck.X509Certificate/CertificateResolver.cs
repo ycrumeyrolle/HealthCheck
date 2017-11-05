@@ -6,7 +6,7 @@ namespace AspNetCore.HealthCheck
     {
         public X509Certificate2 ResolveCertificate(StoreName name, StoreLocation location, string thumbprint)
         {
-#if NETSTANDARD1_3
+#if NETSTANDARD2_0
             using (var store = new X509Store(name, location))
             {
                 store.Open(OpenFlags.ReadOnly);

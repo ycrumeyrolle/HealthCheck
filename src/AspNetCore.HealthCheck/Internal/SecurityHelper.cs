@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication;
 
 namespace AspNetCore.HealthCheck
 {
@@ -45,10 +46,10 @@ namespace AspNetCore.HealthCheck
                 ClaimsPrincipal newPrincipal = null;
                 foreach (var scheme in authorizationPolicy.AuthenticationSchemes)
                 {
-                    var result = await context.Authentication.AuthenticateAsync(scheme);
-                    if (result != null)
+                    var authenticateResult = await context.AuthenticateAsync(scheme);
+                    if (authenticateResult != null)
                     {
-                        newPrincipal = SecurityHelper.MergeUserPrincipal(newPrincipal, result);
+                        newPrincipal = SecurityHelper.MergeUserPrincipal(newPrincipal, authenticateResult.Principal);
                     }
                 }
 

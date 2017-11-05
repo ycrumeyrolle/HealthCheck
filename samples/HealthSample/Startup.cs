@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -21,8 +20,11 @@ namespace AspNetCore.HealthCheck.Sample
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services
-                .AddEntityFrameworkInMemoryDatabase()
+            services.AddAuthentication(options => options.DefaultAuthenticateScheme = "apiKey")
+                .AddScheme<AuthenticationSchemeOptions, FakeAuthenticationHandler>("apiKey", "test",
+                    options => {  });
+
+            services.AddEntityFrameworkInMemoryDatabase()
                 .AddDbContext<FakeDbContext>(
                     (sp, builder) =>
                         builder.UseInternalServiceProvider(sp)
@@ -116,7 +118,7 @@ namespace AspNetCore.HealthCheck.Sample
 
             app.Map("/loopback", a => a.Run(ctx => ctx.Response.WriteAsync("OK")));
 
-            app.UseMiddleware<FakeAuthenticationMiddleware>();
+            app.UseAuthentication();
             app.UseHealthCheck(new HealthCheckOptions
             {
                 Path = "/health",
@@ -147,32 +149,21 @@ namespace AspNetCore.HealthCheck.Sample
         public string Value { get; set; }
     }
 
-    public class FakeAuthenticationMiddleware : AuthenticationMiddleware<FakeAuthenticationOptions>
+    public class FakeAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        public FakeAuthenticationMiddleware(RequestDelegate next, IOptions<FakeAuthenticationOptions> options, ILoggerFactory loggerFactory, UrlEncoder encoder)
-            : base(next, options, loggerFactory, encoder)
+        private const string FakeAuthenticationScheme = "apiKey";
+
+        public FakeAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, Microsoft.AspNetCore.Authentication.ISystemClock clock) : base(options, logger, encoder, clock)
         {
         }
 
-        protected override AuthenticationHandler<FakeAuthenticationOptions> CreateHandler()
-        {
-            return new FakeAuthenticationHandler();
-        }
-    }
-
-    public class FakeAuthenticationHandler : AuthenticationHandler<FakeAuthenticationOptions>
-    {
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "bob") })), new AuthenticationProperties(), "apikey")));
-        }
-    }
-
-    public class FakeAuthenticationOptions : AuthenticationOptions
-    {
-        public FakeAuthenticationOptions()
-        {
-            AutomaticAuthenticate = true;
+            var claimsIdentity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "bob") });
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+            var authenticationProperties = new AuthenticationProperties();
+            AuthenticationTicket authenticationTicket = new AuthenticationTicket(claimsPrincipal, authenticationProperties, FakeAuthenticationScheme);
+            return Task.FromResult(AuthenticateResult.Success(authenticationTicket));
         }
     }
 }
