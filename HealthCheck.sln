@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.27004.2008
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D8A178DB-9C77-461F-8C32-31AD2152B225}"
 	ProjectSection(SolutionItems) = preProject
@@ -51,14 +51,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Coun
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.X509Certificate.Tests", "test\AspNetCore.HealthCheck.X509Certificate.Tests\AspNetCore.HealthCheck.X509Certificate.Tests.csproj", "{56ADBE75-3025-4BAB-8589-BA1FC2A3DA87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.HealthCheck.Redis", "src\AspNetCore.HealthCheck.Redis\AspNetCore.HealthCheck.Redis.csproj", "{DB658915-C43F-4956-A860-578E14C047BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Redis", "src\AspNetCore.HealthCheck.Redis\AspNetCore.HealthCheck.Redis.csproj", "{DB658915-C43F-4956-A860-578E14C047BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.HealthCheck.Redis.Tests", "test\AspNetCore.HealthCheck.Redis.Tests\AspNetCore.HealthCheck.Redis.Tests.csproj", "{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Redis.Tests", "test\AspNetCore.HealthCheck.Redis.Tests\AspNetCore.HealthCheck.Redis.Tests.csproj", "{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.HealthCheck.Mongo", "src\AspNetCore.HealthCheck.Mongo\AspNetCore.HealthCheck.Mongo.csproj", "{B1E5C2B7-EF52-458F-8039-6E9171986654}"
 EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -148,6 +147,10 @@ Global
 		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1E5C2B7-EF52-458F-8039-6E9171986654}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1E5C2B7-EF52-458F-8039-6E9171986654}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1E5C2B7-EF52-458F-8039-6E9171986654}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1E5C2B7-EF52-458F-8039-6E9171986654}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -161,6 +164,12 @@ Global
 		{C90A0805-031A-4161-AFF9-7875A403D230} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
 		{56ADBE75-3025-4BAB-8589-BA1FC2A3DA87} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
 		{0557A0FE-F7E8-4173-BAF3-B8FD7B9C2A93} = {8E339010-A6AC-4ADE-88C1-86D573B4DCCC}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F1F6F2AF-C01D-4A33-9BFD-06ABF294A856}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true

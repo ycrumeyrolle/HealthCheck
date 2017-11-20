@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.Http\AspNetCore.HealthCheck.Http.csproj" />
+    <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.Mongo\AspNetCore.HealthCheck.Mongo.csproj" />
     <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.Oracle\AspNetCore.HealthCheck.Oracle.csproj" />
     <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.SqlServer\AspNetCore.HealthCheck.SqlServer.csproj" />
     <ProjectReference Include="..\..\src\AspNetCore.HealthCheck.System\AspNetCore.HealthCheck.System.csproj" />
