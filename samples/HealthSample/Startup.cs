@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using AspNetCore.HealthCheck.Smtp;
+using AspNetCore.HealthCheck.Mongo;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -22,7 +22,7 @@ namespace AspNetCore.HealthCheck.Sample
         {
             services.AddAuthentication(options => options.DefaultAuthenticateScheme = "apiKey")
                 .AddScheme<AuthenticationSchemeOptions, FakeAuthenticationHandler>("apiKey", "test",
-                    options => {  });
+                    options => { });
 
             services.AddEntityFrameworkInMemoryDatabase()
                 .AddDbContext<FakeDbContext>(
@@ -103,6 +103,13 @@ namespace AspNetCore.HealthCheck.Sample
                         {
                             ctx.Succeed();
                             return TaskCache.CompletedTask;
+                        })
+                        .AddMongoCheck("mongo check", mongo =>
+                        {
+                            mongo
+                                .WithConnectionString("mongodb://localhost:27017/test")
+                                .IsCritical()
+                                .HasTag("mongo", "database");
                         });
                 });
 
